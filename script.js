@@ -1,7 +1,7 @@
 // ============================================================
 // 🔴 बस इस एक लाइन में अपना .m3u8 लिंक डालें
 // ============================================================
-const DEFAULT_VIDEO_URL = "https://vs.classplusapp.com/hls/6a6de67e171a692953abe1fe/index.m3u8";
+const DEFAULT_VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
 // ↑ इसको बदलकर अपना REAL .m3u8 लिंक डालें
 
 let hls = null;
