@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>लाइव स्ट्रीम</title>
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <div class="container">
     <div class="header">
       <h1>📺 लाइव स्ट्रीम</h1>
@@ -15,7 +16,7 @@
     </div>
 
     <div class="video-wrapper">
-      <video id="videoPlayer" controls playsinline></video>
+      <video id="videoPlayer" controls playsinline autoplay></video>
     </div>
 
     <div class="status-bar">
@@ -29,13 +30,8 @@
       </div>
     </div>
 
-    <div class="input-section">
-      <input type="text" id="videoUrlInput" placeholder="यहाँ .m3u8 लिंक पेस्ट करें...">
-      <button onclick="loadVideoFromInput()">🎬 लोड करें</button>
-    </div>
-
-    <div id="errorMsg" class="error-msg"></div>
-    <div class="footer">⚡ Render पर होस्ट किया गया | अपना .m3u8 लिंक डालें</div>
+    <div id="errorMsg" class="error-msg">❌ वीडियो लोड नहीं हुआ। लिंक एक्सपायर हो सकता है।</div>
+    <div class="footer">⚡ Render पर होस्ट किया गया</div>
   </div>
 
   <script src="script.js"></script>
