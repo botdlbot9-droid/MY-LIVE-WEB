@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Live Stream - 1 Sec Timer</title>
+    <title>Secure Live Stream - 60 Sec Timer</title>
     <link href="https://unpkg.com/video.js@8/dist/video-js.min.css" rel="stylesheet">
     <script src="https://unpkg.com/video.js@8/dist/video.min.js"></script>
     <script src="https://unpkg.com/@videojs/http-streaming@3/dist/videojs-http-streaming.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
+        /* ================================================================
+           CSS - Full Dark Theme (Verification + Player)
+           ================================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -40,6 +43,7 @@
             display: none !important;
         }
 
+        /* ===== VERIFICATION PAGE ===== */
         #verificationPage {
             max-width: 500px;
             margin: 40px auto;
@@ -129,6 +133,9 @@
             min-height: 20px;
         }
 
+        /* ================================================================
+           🔥 KEY LIST - Click to Copy
+           ================================================================ */
         .key-list-container {
             margin-top: 25px;
             padding: 20px;
@@ -207,6 +214,7 @@
             opacity: 1;
         }
 
+        /* ===== PLAYER PAGE ===== */
         .header {
             display: flex;
             justify-content: space-between;
@@ -277,6 +285,9 @@
             50% { opacity: 0.3; transform: scale(0.8); }
         }
 
+        /* ================================================================
+           🔥 TIMER BAR - 60 Second Countdown
+           ================================================================ */
         .timer-bar {
             display: flex;
             justify-content: center;
@@ -296,11 +307,11 @@
 
         .timer-bar .value {
             font-weight: 700;
-            color: #f7971e;
+            color: #00ff88;
             font-family: 'Courier New', monospace;
             font-size: 28px;
             letter-spacing: 3px;
-            min-width: 30px;
+            min-width: 60px;
             text-align: center;
         }
 
@@ -382,6 +393,9 @@
             100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
         }
 
+        /* ================================================================
+           🔥 DURATION DISPLAY - ONLY LECTURE TIME
+           ================================================================ */
         .duration-bar {
             display: flex;
             justify-content: center;
@@ -495,6 +509,9 @@
             color: #f7971e;
         }
 
+        /* ================================================================
+           🚫 SUSPEND MAINTENANCE PAGE
+           ================================================================ */
         #maintenanceOverlay {
             position: fixed;
             top: 0;
@@ -605,6 +622,9 @@
 </head>
 <body>
 
+    <!-- ========================================================== -->
+    <!-- 🚫 MAINTENANCE OVERLAY (Hidden by default) -->
+    <!-- ========================================================== -->
     <div id="maintenanceOverlay">
         <div class="maintenance-icon">🔧</div>
         <div class="maintenance-title">Under Maintenance</div>
@@ -618,8 +638,12 @@
         <div class="maintenance-time" id="maintenanceTime"></div>
     </div>
 
+    <!-- ========================================================== -->
+    <!-- 🔐 MAIN APP -->
+    <!-- ========================================================== -->
     <div class="container" id="appContainer">
 
+        <!-- ===== VERIFICATION PAGE ===== -->
         <div id="verificationPage">
             <div class="verify-icon">🔑</div>
             <div class="verify-title">Access Code Required</div>
@@ -638,6 +662,7 @@
             </div>
         </div>
 
+        <!-- ===== PLAYER PAGE ===== -->
         <div id="playerPage" class="hidden">
 
             <div class="header">
@@ -651,11 +676,11 @@
                 <div class="live-badge">लाइव</div>
             </div>
 
-            <!-- ⏱️ 1 SECOND TIMER -->
+            <!-- 🔥 TIMER BAR - 60 Second Countdown -->
             <div class="timer-bar" id="timerBar">
                 <span class="timer-icon">⏳</span>
-                <span class="label">Session Time Remaining:</span>
-                <span class="value" id="timerDisplay">1</span>
+                <span class="label">⏱️ Session Time Remaining:</span>
+                <span class="value" id="timerDisplay">60</span>
             </div>
 
             <div class="player-wrapper">
@@ -666,6 +691,7 @@
                 </video>
             </div>
 
+            <!-- 🔥 DURATION BAR -->
             <div class="duration-bar">
                 <span class="live-icon">●</span>
                 <span class="label">⏱️ Lecture Duration:</span>
@@ -693,21 +719,31 @@
             <div id="message" class="message"></div>
 
             <footer class="footer">
-                <p>⚡ <span class="highlight">Secure Stream</span> — One-Time Access (1 Sec)</p>
+                <p>⚡ <span class="highlight">Secure Stream</span> — One-Time Access (60 Sec)</p>
             </footer>
         </div>
 
     </div>
 
+    <!-- ============================================================ -->
+    <!-- TOAST MESSAGE -->
+    <!-- ============================================================ -->
     <div id="toastMessage" class="toast-message">✅ Copied!</div>
 
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT -->
+    <!-- ============================================================ -->
     <script>
         /**
          * ================================================================
-         *  🔐 SECURE LIVE STREAM - 1 SECOND TIMER (TEST)
-         *  - Key verification
-         *  - 1 second timer
-         *  - After 1 second, asks for key again
+         *  🔐 SECURE LIVE STREAM - One-Time Verification Key
+         *  - Click on any key to copy it
+         *  - User must enter valid 8-digit key
+         *  - Key can be used only once (stored in localStorage)
+         *  - Shows lecture duration in HH:MM:SS format (from video)
+         *  - ⏱️ 60 Second Timer - Starts after verification
+         *  - When timer hits 00, asks for key again
+         *  - ✅ Enter key works on the input field
          * ================================================================
          */
 
@@ -718,9 +754,10 @@
         const CLASS_NAME = "ClassPlus Live";
         const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
 
-        // ⭐⭐⭐ 1 SECOND TIMER (TEST) ⭐⭐⭐
-        const TIMER_DURATION = 1;
+        // ⭐⭐⭐ 60 SECOND TIMER ⭐⭐⭐
+        const TIMER_DURATION = 60;
 
+        // ⭐⭐⭐ 40 Random One-Time Keys ⭐⭐⭐
         const VALID_KEYS = [
             'K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
             'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4',
@@ -732,6 +769,10 @@
             'P2Q7M5T9', 'C8V4B9N3', 'F5R2K8W7', 'G9T3E7S5'
         ];
 
+        // ============================================================
+        // 🚫 RENDER SUSPEND DETECTION
+        // ============================================================
+
         const IS_SUSPENDED = false;
         const urlParams = new URLSearchParams(window.location.search);
         const suspendParam = urlParams.get('suspend');
@@ -740,6 +781,7 @@
         // ============================================================
         // 📦 DOM REFS
         // ============================================================
+        const appContainer = document.getElementById('appContainer');
         const verificationPage = document.getElementById('verificationPage');
         const playerPage = document.getElementById('playerPage');
         const maintenanceOverlay = document.getElementById('maintenanceOverlay');
@@ -759,10 +801,17 @@
         const timerDisplay = document.getElementById('timerDisplay');
         const timerBar = document.getElementById('timerBar');
 
+        // ============================================================
+        // ⏱️ TIMER STATE
+        // ============================================================
         let timerInterval = null;
         let timeRemaining = TIMER_DURATION;
         let isTimerRunning = false;
+        let sessionKey = null;
 
+        // ============================================================
+        // 🏷️ SET CLASS NAME
+        // ============================================================
         classNameText.textContent = CLASS_NAME;
 
         // ============================================================
@@ -772,22 +821,28 @@
         function startTimer() {
             if (isTimerRunning) return;
             
-            // Check saved timer
+            // Check if there's a saved timer state
             const savedTimer = localStorage.getItem('timerRemaining');
+            const savedKey = localStorage.getItem('sessionKey');
             const savedStartTime = localStorage.getItem('timerStartTime');
             
-            if (savedTimer && savedStartTime) {
+            if (savedTimer && savedKey && savedStartTime) {
+                // Calculate elapsed time
                 const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
                 timeRemaining = Math.max(0, parseInt(savedTimer) - elapsed);
+                sessionKey = savedKey;
                 
                 if (timeRemaining <= 0) {
+                    // Timer expired - show verification again
                     showVerificationPage();
                     return;
                 }
             } else {
+                // Start fresh timer
                 timeRemaining = TIMER_DURATION;
                 localStorage.setItem('timerStartTime', Date.now().toString());
                 localStorage.setItem('timerRemaining', timeRemaining.toString());
+                localStorage.setItem('sessionKey', sessionKey);
             }
 
             isTimerRunning = true;
@@ -798,18 +853,21 @@
                 localStorage.setItem('timerRemaining', timeRemaining.toString());
                 updateTimerDisplay();
                 
-                if (timeRemaining < 1) {
+                // Warning when less than 10 seconds
+                if (timeRemaining < 10) {
                     timerBar.classList.add('warning');
                 } else {
                     timerBar.classList.remove('warning');
                 }
                 
+                // Timer expired
                 if (timeRemaining <= 0) {
                     clearInterval(timerInterval);
                     timerInterval = null;
                     isTimerRunning = false;
                     localStorage.removeItem('timerRemaining');
                     localStorage.removeItem('timerStartTime');
+                    localStorage.removeItem('sessionKey');
                     showVerificationPage();
                 }
             }, 1000);
@@ -834,13 +892,16 @@
             updateTimerDisplay();
             localStorage.removeItem('timerRemaining');
             localStorage.removeItem('timerStartTime');
+            localStorage.removeItem('sessionKey');
         }
 
         function showVerificationPage() {
             stopTimer();
             resetTimer();
+            // Hide player, show verification
             playerPage.classList.add('hidden');
             verificationPage.classList.remove('hidden');
+            // Reset video
             if (player) {
                 player.pause();
                 player.src({ src: '', type: '' });
@@ -954,18 +1015,25 @@
             }
 
             if (VALID_KEYS.includes(enteredKey)) {
+                // Mark key as used
                 usedKeys.push(enteredKey);
                 localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
+
+                // Store session key
+                sessionKey = enteredKey;
+                localStorage.setItem('sessionKey', sessionKey);
 
                 verifyMessage.textContent = '✅ Access granted! Loading stream...';
                 verifyMessage.className = 'verify-success';
 
+                // Hide verification, show player
                 setTimeout(() => {
                     verificationPage.classList.add('hidden');
                     playerPage.classList.remove('hidden');
                     initPlayer();
                     setTimeout(() => {
                         loadLiveStream();
+                        // Start timer after stream loads
                         startTimer();
                     }, 500);
                 }, 800);
@@ -1049,6 +1117,9 @@
                 hideMessage();
             });
 
+            // ============================================================
+            // 🔥 LECTURE DURATION - Video Current Time (HH:MM:SS)
+            // ============================================================
             player.on('timeupdate', function() {
                 const currentTime = player.currentTime();
                 if (currentTime && !isNaN(currentTime) && currentTime > 0) {
@@ -1121,7 +1192,7 @@
         }
 
         // ============================================================
-        // 🚀 PAGE LOAD
+        // 🚀 PAGE LOAD - Check if suspended
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             classNameText.textContent = CLASS_NAME;
@@ -1133,14 +1204,18 @@
 
             renderKeys();
             
+            // Check if there's an active session
+            const savedKey = localStorage.getItem('sessionKey');
             const savedTimer = localStorage.getItem('timerRemaining');
             const savedStartTime = localStorage.getItem('timerStartTime');
             
-            if (savedTimer && savedStartTime) {
+            if (savedKey && savedTimer && savedStartTime) {
                 const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
                 const remaining = parseInt(savedTimer) - elapsed;
                 
                 if (remaining > 0) {
+                    // Session is still valid
+                    sessionKey = savedKey;
                     timeRemaining = remaining;
                     verificationPage.classList.add('hidden');
                     playerPage.classList.remove('hidden');
@@ -1152,15 +1227,24 @@
                     console.log('✅ Session restored! Time remaining:', timeRemaining);
                     return;
                 } else {
+                    // Session expired
                     localStorage.removeItem('timerRemaining');
                     localStorage.removeItem('timerStartTime');
+                    localStorage.removeItem('sessionKey');
                 }
             }
 
             console.log('✅ Secure Live Stream initialized!');
-            console.log('⏱️ Timer: 1 Second (TEST MODE)');
+            console.log('📚 Class Name:', CLASS_NAME);
+            console.log('🔑 Total Keys:', VALID_KEYS.length);
+            console.log('⏱️ Timer Duration: 60 Seconds');
+            console.log('💡 Click any key to copy');
+            console.log('⌨️ Press ENTER to verify key');
         });
 
+        // ============================================================
+        // 🔄 AUTO-RETRY - Stalled Recovery
+        // ============================================================
         setInterval(function() {
             if (!player) return;
             if (!player.paused() && player.readyState < 3) {
