@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Live Stream - Verification</title>
+    <title>Secure Live Stream - 60 Sec Timer</title>
     <link href="https://unpkg.com/video.js@8/dist/video-js.min.css" rel="stylesheet">
     <script src="https://unpkg.com/video.js@8/dist/video.min.js"></script>
     <script src="https://unpkg.com/@videojs/http-streaming@3/dist/videojs-http-streaming.min.js"></script>
@@ -286,7 +286,7 @@
         }
 
         /* ================================================================
-           🔥 TIMER BAR - 2 Hour Countdown
+           🔥 TIMER BAR - 60 Second Countdown
            ================================================================ */
         .timer-bar {
             display: flex;
@@ -307,11 +307,11 @@
 
         .timer-bar .value {
             font-weight: 700;
-            color: #f7971e;
+            color: #00ff88;
             font-family: 'Courier New', monospace;
-            font-size: 24px;
+            font-size: 28px;
             letter-spacing: 3px;
-            min-width: 80px;
+            min-width: 60px;
             text-align: center;
         }
 
@@ -613,7 +613,7 @@
             .key-item { font-size: 14px; padding: 8px 6px; }
             .duration-bar { flex-wrap: wrap; }
             .timer-bar { flex-wrap: wrap; }
-            .timer-bar .value { font-size: 18px; }
+            .timer-bar .value { font-size: 20px; }
             .btn-group { flex-direction: column; align-items: center; }
             #maintenanceOverlay .maintenance-title { font-size: 24px; }
             #maintenanceOverlay .maintenance-subtitle { font-size: 16px; }
@@ -676,11 +676,11 @@
                 <div class="live-badge">लाइव</div>
             </div>
 
-            <!-- 🔥 TIMER BAR - 2 Minute Countdown (TEST MODE) -->
+            <!-- 🔥 TIMER BAR - 60 Second Countdown -->
             <div class="timer-bar" id="timerBar">
                 <span class="timer-icon">⏳</span>
                 <span class="label">⏱️ Session Time Remaining:</span>
-                <span class="value" id="timerDisplay">02:00</span>
+                <span class="value" id="timerDisplay">60</span>
             </div>
 
             <div class="player-wrapper">
@@ -719,7 +719,7 @@
             <div id="message" class="message"></div>
 
             <footer class="footer">
-                <p>⚡ <span class="highlight">Secure Stream</span> — One-Time Access</p>
+                <p>⚡ <span class="highlight">Secure Stream</span> — One-Time Access (60 Sec)</p>
             </footer>
         </div>
 
@@ -741,8 +741,8 @@
          *  - User must enter valid 8-digit key
          *  - Key can be used only once (stored in localStorage)
          *  - Shows lecture duration in HH:MM:SS format (from video)
-         *  - ⏱️ 2 Minute Timer (TEST MODE) - Starts after verification
-         *  - When timer hits 00:00, asks for key again
+         *  - ⏱️ 60 Second Timer - Starts after verification
+         *  - When timer hits 00, asks for key again
          *  - ✅ Enter key works on the input field
          * ================================================================
          */
@@ -754,8 +754,8 @@
         const CLASS_NAME = "ClassPlus Live";
         const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
 
-        // ⭐⭐⭐ TEST MODE: 2 minutes (120 seconds) ⭐⭐⭐
-        const TIMER_DURATION = 120;
+        // ⭐⭐⭐ 60 SECOND TIMER ⭐⭐⭐
+        const TIMER_DURATION = 60;
 
         // ⭐⭐⭐ 40 Random One-Time Keys ⭐⭐⭐
         const VALID_KEYS = [
@@ -853,8 +853,8 @@
                 localStorage.setItem('timerRemaining', timeRemaining.toString());
                 updateTimerDisplay();
                 
-                // Warning when less than 30 seconds
-                if (timeRemaining < 30) {
+                // Warning when less than 10 seconds
+                if (timeRemaining < 10) {
                     timerBar.classList.add('warning');
                 } else {
                     timerBar.classList.remove('warning');
@@ -874,11 +874,7 @@
         }
 
         function updateTimerDisplay() {
-            const minutes = Math.floor(timeRemaining / 60);
-            const seconds = timeRemaining % 60;
-            timerDisplay.textContent = 
-                String(minutes).padStart(2, '0') + ':' + 
-                String(seconds).padStart(2, '0');
+            timerDisplay.textContent = timeRemaining;
         }
 
         function stopTimer() {
@@ -1241,7 +1237,7 @@
             console.log('✅ Secure Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
             console.log('🔑 Total Keys:', VALID_KEYS.length);
-            console.log('⏱️ Timer Duration: 2 Minutes (TEST MODE)');
+            console.log('⏱️ Timer Duration: 60 Seconds');
             console.log('💡 Click any key to copy');
             console.log('⌨️ Press ENTER to verify key');
         });
