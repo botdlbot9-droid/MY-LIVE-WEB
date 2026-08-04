@@ -285,6 +285,46 @@
             50% { opacity: 0.3; transform: scale(0.8); }
         }
 
+        /* ================================================================
+           🔥 TIMER BAR - 2 Hour Countdown
+           ================================================================ */
+        .timer-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            background: #12121e;
+            border-radius: 10px;
+            border: 1px solid #2a2a4e;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .timer-bar .label {
+            color: #a0a0b8;
+        }
+
+        .timer-bar .value {
+            font-weight: 700;
+            color: #f7971e;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            letter-spacing: 3px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .timer-bar .timer-icon {
+            color: #ff0044;
+            animation: pulse 1.5s infinite;
+        }
+
+        .timer-bar.warning .value {
+            color: #ff6b6b;
+            animation: blink 0.5s infinite;
+        }
+
         .player-wrapper {
             background: #000;
             border-radius: 12px;
@@ -572,6 +612,8 @@
             .key-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
             .key-item { font-size: 14px; padding: 8px 6px; }
             .duration-bar { flex-wrap: wrap; }
+            .timer-bar { flex-wrap: wrap; }
+            .timer-bar .value { font-size: 18px; }
             .btn-group { flex-direction: column; align-items: center; }
             #maintenanceOverlay .maintenance-title { font-size: 24px; }
             #maintenanceOverlay .maintenance-subtitle { font-size: 16px; }
@@ -634,6 +676,13 @@
                 <div class="live-badge">लाइव</div>
             </div>
 
+            <!-- 🔥 TIMER BAR - 2 Hour Countdown -->
+            <div class="timer-bar" id="timerBar">
+                <span class="timer-icon">⏳</span>
+                <span class="label">Time Remaining:</span>
+                <span class="value" id="timerDisplay">02:00:00</span>
+            </div>
+
             <div class="player-wrapper">
                 <video id="my-video" class="video-js vjs-big-play-centered vjs-16-9" 
                        controls preload="auto" playsinline
@@ -692,8 +741,9 @@
          *  - User must enter valid 8-digit key
          *  - Key can be used only once (stored in localStorage)
          *  - Shows lecture duration in HH:MM:SS format (from video)
+         *  - ⏱️ 2 Hour Timer - Starts after verification
+         *  - When timer hits 00:00:00, asks for key again
          *  - ✅ Enter key works on the input field
-         *  - 🚫 SUSPEND MODE: Set SUSPENDED = true to disable website
          * ================================================================
          */
 
@@ -703,6 +753,9 @@
 
         const CLASS_NAME = "ClassPlus Live";
         const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
+
+        // Timer duration in seconds (2 hours = 7200 seconds)
+        const TIMER_DURATION = 7200;
 
         // ⭐⭐⭐ 40 Random One-Time Keys ⭐⭐⭐
         const VALID_KEYS = [
@@ -720,14 +773,9 @@
         // 🚫 RENDER SUSPEND DETECTION
         // ============================================================
 
-        // ⭐⭐⭐ CHANGE THIS TO 'true' TO SUSPEND, 'false' TO RESUME ⭐⭐⭐
-        const IS_SUSPENDED = false; // ← Change here
-
-        // Check URL query parameter: ?suspend=true
+        const IS_SUSPENDED = false;
         const urlParams = new URLSearchParams(window.location.search);
         const suspendParam = urlParams.get('suspend');
-
-        // If suspend parameter exists in URL, override the variable
         const SUSPENDED = suspendParam !== null ? suspendParam === 'true' : IS_SUSPENDED;
 
         // ============================================================
@@ -750,6 +798,124 @@
         const messageEl = document.getElementById('message');
         const classNameText = document.getElementById('classNameText');
         const durationDisplay = document.getElementById('durationDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerBar = document.getElementById('timerBar');
+
+        // ============================================================
+        // ⏱️ TIMER STATE
+        // ============================================================
+        let timerInterval = null;
+        let timeRemaining = TIMER_DURATION;
+        let isTimerRunning = false;
+        let sessionKey = null;
+
+        // ============================================================
+        // 🏷️ SET CLASS NAME
+        // ============================================================
+        classNameText.textContent = CLASS_NAME;
+
+        // ============================================================
+        // ⏱️ TIMER FUNCTIONS
+        // ============================================================
+
+        function startTimer() {
+            if (isTimerRunning) return;
+            
+            // Check if there's a saved timer state
+            const savedTimer = localStorage.getItem('timerRemaining');
+            const savedKey = localStorage.getItem('sessionKey');
+            const savedStartTime = localStorage.getItem('timerStartTime');
+            
+            if (savedTimer && savedKey && savedStartTime) {
+                // Calculate elapsed time
+                const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
+                timeRemaining = Math.max(0, parseInt(savedTimer) - elapsed);
+                sessionKey = savedKey;
+                
+                if (timeRemaining <= 0) {
+                    // Timer expired - show verification again
+                    showVerificationPage();
+                    return;
+                }
+            } else {
+                // Start fresh timer
+                timeRemaining = TIMER_DURATION;
+                localStorage.setItem('timerStartTime', Date.now().toString());
+                localStorage.setItem('timerRemaining', timeRemaining.toString());
+                localStorage.setItem('sessionKey', sessionKey);
+            }
+
+            isTimerRunning = true;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                localStorage.setItem('timerRemaining', timeRemaining.toString());
+                updateTimerDisplay();
+                
+                // Warning when less than 5 minutes
+                if (timeRemaining < 300) {
+                    timerBar.classList.add('warning');
+                } else {
+                    timerBar.classList.remove('warning');
+                }
+                
+                // Timer expired
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    isTimerRunning = false;
+                    localStorage.removeItem('timerRemaining');
+                    localStorage.removeItem('timerStartTime');
+                    localStorage.removeItem('sessionKey');
+                    showVerificationPage();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(timeRemaining / 3600);
+            const minutes = Math.floor((timeRemaining % 3600) / 60);
+            const seconds = timeRemaining % 60;
+            timerDisplay.textContent = 
+                String(hours).padStart(2, '0') + ':' + 
+                String(minutes).padStart(2, '0') + ':' + 
+                String(seconds).padStart(2, '0');
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            isTimerRunning = false;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timeRemaining = TIMER_DURATION;
+            timerBar.classList.remove('warning');
+            updateTimerDisplay();
+            localStorage.removeItem('timerRemaining');
+            localStorage.removeItem('timerStartTime');
+            localStorage.removeItem('sessionKey');
+        }
+
+        function showVerificationPage() {
+            stopTimer();
+            resetTimer();
+            // Hide player, show verification
+            playerPage.classList.add('hidden');
+            verificationPage.classList.remove('hidden');
+            // Reset video
+            if (player) {
+                player.pause();
+                player.src({ src: '', type: '' });
+            }
+            showMessage('⏱️ Session expired! Please enter a new key.', 'info');
+            keyInput.value = '';
+            keyInput.focus();
+        }
 
         // ============================================================
         // 🚫 SUSPEND FUNCTIONS
@@ -757,23 +923,16 @@
 
         function showMaintenancePage() {
             maintenanceOverlay.classList.add('show');
-            // Update time
-            updateMaintenanceTime();
-            // Update time every second
             if (window._maintenanceInterval) {
                 clearInterval(window._maintenanceInterval);
             }
-            window._maintenanceInterval = setInterval(updateMaintenanceTime, 1000);
-            console.log('🚫 Website is SUSPENDED. Showing maintenance page.');
-        }
-
-        function updateMaintenanceTime() {
-            const now = new Date();
-            maintenanceTime.textContent = '⏰ ' + now.toLocaleString();
+            window._maintenanceInterval = setInterval(() => {
+                maintenanceTime.textContent = '⏰ ' + new Date().toLocaleString();
+            }, 1000);
+            console.log('🚫 Website is SUSPENDED.');
         }
 
         function resumeWebsite() {
-            // Remove suspend parameter and reload
             const url = new URL(window.location.href);
             url.searchParams.delete('suspend');
             window.location.href = url.toString();
@@ -862,17 +1021,27 @@
             }
 
             if (VALID_KEYS.includes(enteredKey)) {
+                // Mark key as used
                 usedKeys.push(enteredKey);
                 localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
+
+                // Store session key
+                sessionKey = enteredKey;
+                localStorage.setItem('sessionKey', sessionKey);
 
                 verifyMessage.textContent = '✅ Access granted! Loading stream...';
                 verifyMessage.className = 'verify-success';
 
+                // Hide verification, show player
                 setTimeout(() => {
                     verificationPage.classList.add('hidden');
                     playerPage.classList.remove('hidden');
                     initPlayer();
-                    setTimeout(() => loadLiveStream(), 500);
+                    setTimeout(() => {
+                        loadLiveStream();
+                        // Start timer after stream loads
+                        startTimer();
+                    }, 500);
                 }, 800);
 
             } else {
@@ -1032,26 +1201,51 @@
         // 🚀 PAGE LOAD - Check if suspended
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Set class name
             classNameText.textContent = CLASS_NAME;
 
-            // Check if suspended
             if (SUSPENDED) {
                 showMaintenancePage();
                 return;
             }
 
-            // Normal initialization
             renderKeys();
+            
+            // Check if there's an active session
+            const savedKey = localStorage.getItem('sessionKey');
+            const savedTimer = localStorage.getItem('timerRemaining');
+            const savedStartTime = localStorage.getItem('timerStartTime');
+            
+            if (savedKey && savedTimer && savedStartTime) {
+                const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
+                const remaining = parseInt(savedTimer) - elapsed;
+                
+                if (remaining > 0) {
+                    // Session is still valid
+                    sessionKey = savedKey;
+                    timeRemaining = remaining;
+                    verificationPage.classList.add('hidden');
+                    playerPage.classList.remove('hidden');
+                    initPlayer();
+                    setTimeout(() => {
+                        loadLiveStream();
+                        startTimer();
+                    }, 500);
+                    console.log('✅ Session restored! Time remaining:', timeRemaining);
+                    return;
+                } else {
+                    // Session expired
+                    localStorage.removeItem('timerRemaining');
+                    localStorage.removeItem('timerStartTime');
+                    localStorage.removeItem('sessionKey');
+                }
+            }
+
             console.log('✅ Secure Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
             console.log('🔑 Total Keys:', VALID_KEYS.length);
-            console.log('📺 Video URL:', VIDEO_URL);
-            console.log('🔒 Referer: REMOVED');
+            console.log('⏱️ Timer Duration: 2 Hours');
             console.log('💡 Click any key to copy');
             console.log('⌨️ Press ENTER to verify key');
-            console.log('🔄 Button: LIVE REFRESH');
-            console.log('🚫 Suspend Mode: Set IS_SUSPENDED = true to disable website');
         });
 
         // ============================================================
@@ -1059,18 +1253,17 @@
         // ============================================================
         setInterval(function() {
             if (!player) return;
-            try {
-                const tech = player.tech({ IWillNotUseThisInPlugins: true });
-                if (tech && tech.vhs) {
-                    const vhs = tech.vhs;
-                    if (vhs && vhs.buffer && vhs.buffer.length === 0 && !player.paused()) {
+            if (!player.paused() && player.readyState < 3) {
+                try {
+                    const tech = player.tech({ IWillNotUseThisInPlugins: true });
+                    if (tech && tech.vhs && tech.vhs.buffer && tech.vhs.buffer.length === 0) {
                         console.log('🔄 Buffer empty, reloading...');
                         player.src({ src: VIDEO_URL, type: 'application/x-mpegURL' });
                         player.play().catch(() => {});
                     }
+                } catch (e) {
+                    // Ignore
                 }
-            } catch (e) {
-                // Ignore
             }
         }, 5000);
     </script>
