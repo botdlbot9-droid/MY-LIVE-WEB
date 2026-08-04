@@ -354,7 +354,7 @@
         }
 
         /* ================================================================
-           🔥 DURATION DISPLAY - ONLY LECTURE TIME (Removed Actual Time)
+           🔥 DURATION DISPLAY - ONLY LECTURE TIME
            ================================================================ */
         .duration-bar {
             display: flex;
@@ -469,6 +469,99 @@
             color: #f7971e;
         }
 
+        /* ================================================================
+           🚫 SUSPEND MAINTENANCE PAGE
+           ================================================================ */
+        #maintenanceOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a12;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #maintenanceOverlay.show {
+            display: flex;
+        }
+
+        #maintenanceOverlay .maintenance-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        #maintenanceOverlay .maintenance-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        #maintenanceOverlay .maintenance-subtitle {
+            color: #a0a0b8;
+            font-size: 18px;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+
+        #maintenanceOverlay .maintenance-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #0a0a12;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            transition: 0.3s;
+        }
+
+        #maintenanceOverlay .maintenance-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
+        }
+
+        #maintenanceOverlay .maintenance-btn-outline {
+            padding: 12px 30px;
+            border: 2px solid #2a2a4e;
+            border-radius: 10px;
+            background: transparent;
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            transition: 0.3s;
+        }
+
+        #maintenanceOverlay .maintenance-btn-outline:hover {
+            border-color: #f7971e;
+            color: #f7971e;
+        }
+
+        #maintenanceOverlay .maintenance-time {
+            color: #6a6a8a;
+            font-size: 13px;
+            margin-top: 30px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         @media (max-width: 768px) {
             .container { padding: 16px; }
             .controls-bar { flex-direction: column; }
@@ -479,16 +572,36 @@
             .key-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
             .key-item { font-size: 14px; padding: 8px 6px; }
             .duration-bar { flex-wrap: wrap; }
+            .btn-group { flex-direction: column; align-items: center; }
+            #maintenanceOverlay .maintenance-title { font-size: 24px; }
+            #maintenanceOverlay .maintenance-subtitle { font-size: 16px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- ========================================================== -->
+    <!-- 🚫 MAINTENANCE OVERLAY (Hidden by default) -->
+    <!-- ========================================================== -->
+    <div id="maintenanceOverlay">
+        <div class="maintenance-icon">🔧</div>
+        <div class="maintenance-title">Under Maintenance</div>
+        <div class="maintenance-subtitle">
+            The live stream is temporarily unavailable. Please check back later.
+        </div>
+        <div class="btn-group">
+            <button class="maintenance-btn" onclick="window.location.reload()">🔄 Refresh</button>
+            <button class="maintenance-btn-outline" onclick="resumeWebsite()">↩️ Resume</button>
+        </div>
+        <div class="maintenance-time" id="maintenanceTime"></div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 🔐 MAIN APP -->
+    <!-- ========================================================== -->
     <div class="container" id="appContainer">
 
-        <!-- ========================================================== -->
-        <!-- 🔐 VERIFICATION PAGE -->
-        <!-- ========================================================== -->
+        <!-- ===== VERIFICATION PAGE ===== -->
         <div id="verificationPage">
             <div class="verify-icon">🔑</div>
             <div class="verify-title">Access Code Required</div>
@@ -507,9 +620,7 @@
             </div>
         </div>
 
-        <!-- ========================================================== -->
-        <!-- 🎬 PLAYER PAGE (Hidden by default) -->
-        <!-- ========================================================== -->
+        <!-- ===== PLAYER PAGE ===== -->
         <div id="playerPage" class="hidden">
 
             <div class="header">
@@ -531,7 +642,7 @@
                 </video>
             </div>
 
-            <!-- 🔥 DURATION BAR - ONLY Lecture Duration -->
+            <!-- 🔥 DURATION BAR -->
             <div class="duration-bar">
                 <span class="live-icon">●</span>
                 <span class="label">⏱️ Lecture Duration:</span>
@@ -582,7 +693,7 @@
          *  - Key can be used only once (stored in localStorage)
          *  - Shows lecture duration in HH:MM:SS format (from video)
          *  - ✅ Enter key works on the input field
-         *  - 🕐 Actual Time REMOVED
+         *  - 🚫 SUSPEND MODE: Set SUSPENDED = true to disable website
          * ================================================================
          */
 
@@ -590,26 +701,44 @@
         // 🔑 CONFIGURATION
         // ============================================================
 
-        const CLASS_NAME = "TRIGONOMETRY BASIC 13";
-        const VIDEO_URL = "https://vs.classplusapp.com/hls/6a71dba41b8a64aaa728c315/720p20.m3u8";
+        const CLASS_NAME = "ClassPlus Live";
+        const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
 
-        // ⭐⭐⭐ 30 Random One-Time Keys ⭐⭐⭐
+        // ⭐⭐⭐ 40 Random One-Time Keys ⭐⭐⭐
         const VALID_KEYS = [
-            'A7B3C9D2', 'E5F8G1H6', 'I9J4K7L3', 'M2N6P8Q5', 'R1T4U7W9',
-            'X3Y6Z9A2', 'B5C8D1E4', 'F7G2H9K6', 'L3M8N4P7', 'Q1R5T8U2',
-            'W4X7Y9Z3', 'A6B9C2D5', 'E8F1G4H7', 'I2K5L9M3', 'N6P8Q1R4',
-            'T7U2W5X9', 'Y3Z6A8B1', 'C4D9E2F7', 'G1H5K8L3', 'M6N9P2Q5',
-            'R8T1U4W7', 'X2Y5Z8A3', 'B6C9D1E4', 'F7G2H5K8', 'L1M4N7P9',
-            'Q2R6T9U3', 'W5X8Y1Z4', 'A7B2C6D9', 'E3F8G1H4', 'K5L9M2N6',
-            'P8Q1R4T7', 'U2W5X9Y3', 'Z6A8B1C4', 'D7E2F5G9', 'H1K4L8M3',
-            'N6P9Q2R5', 'T7U1W4X8', 'Y2Z5A9B3', 'C6D8E1F4', 'G7H2K5L9'
+            'K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
+            'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4',
+            'D7A4F2G9', 'M8P3N6C2', 'V5B9T1E7', 'S4W7R8K2', 'J3H6L9N1',
+            'P8Q2M5T7', 'C6V9B4N2', 'F3R8K7W5', 'L9N2M6P4', 'G5T1E8S7',
+            'B7R4M9K2', 'X8W5P3N1', 'Q2T6V9C4', 'H5J8F3L7', 'Z6M2N9P4',
+            'R8W3Q7T5', 'Y4U9I2O7', 'F9G7H3J5', 'P5N6M8C2', 'T7R4W9Q3',
+            'M2N6P8C5', 'K9H7R2M4', 'V4B8N2C6', 'S7W3R9K5', 'J6H4L8N2',
+            'P2Q7M5T9', 'C8V4B9N3', 'F5R2K8W7', 'G9T3E7S5'
         ];
+
+        // ============================================================
+        // 🚫 RENDER SUSPEND DETECTION
+        // ============================================================
+
+        // ⭐⭐⭐ CHANGE THIS TO 'true' TO SUSPEND, 'false' TO RESUME ⭐⭐⭐
+        const IS_SUSPENDED = false; // ← Change here
+
+        // Check URL query parameter: ?suspend=true
+        const urlParams = new URLSearchParams(window.location.search);
+        const suspendParam = urlParams.get('suspend');
+
+        // If suspend parameter exists in URL, override the variable
+        const SUSPENDED = suspendParam !== null ? suspendParam === 'true' : IS_SUSPENDED;
 
         // ============================================================
         // 📦 DOM REFS
         // ============================================================
+        const appContainer = document.getElementById('appContainer');
         const verificationPage = document.getElementById('verificationPage');
         const playerPage = document.getElementById('playerPage');
+        const maintenanceOverlay = document.getElementById('maintenanceOverlay');
+        const maintenanceTime = document.getElementById('maintenanceTime');
+
         const keyInput = document.getElementById('keyInput');
         const verifyMessage = document.getElementById('verifyMessage');
         const keyGrid = document.getElementById('keyGrid');
@@ -623,12 +752,35 @@
         const durationDisplay = document.getElementById('durationDisplay');
 
         // ============================================================
-        // 🏷️ SET CLASS NAME
+        // 🚫 SUSPEND FUNCTIONS
         // ============================================================
-        classNameText.textContent = CLASS_NAME;
+
+        function showMaintenancePage() {
+            maintenanceOverlay.classList.add('show');
+            // Update time
+            updateMaintenanceTime();
+            // Update time every second
+            if (window._maintenanceInterval) {
+                clearInterval(window._maintenanceInterval);
+            }
+            window._maintenanceInterval = setInterval(updateMaintenanceTime, 1000);
+            console.log('🚫 Website is SUSPENDED. Showing maintenance page.');
+        }
+
+        function updateMaintenanceTime() {
+            const now = new Date();
+            maintenanceTime.textContent = '⏰ ' + now.toLocaleString();
+        }
+
+        function resumeWebsite() {
+            // Remove suspend parameter and reload
+            const url = new URL(window.location.href);
+            url.searchParams.delete('suspend');
+            window.location.href = url.toString();
+        }
 
         // ============================================================
-        // 🔑 RENDER KEYS WITH CLICK-TO-COPY
+        // 🔑 RENDER KEYS
         // ============================================================
         function renderKeys() {
             keyGrid.innerHTML = '';
@@ -877,9 +1029,19 @@
         }
 
         // ============================================================
-        // 🚀 PAGE LOAD
+        // 🚀 PAGE LOAD - Check if suspended
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
+            // Set class name
+            classNameText.textContent = CLASS_NAME;
+
+            // Check if suspended
+            if (SUSPENDED) {
+                showMaintenancePage();
+                return;
+            }
+
+            // Normal initialization
             renderKeys();
             console.log('✅ Secure Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
@@ -887,10 +1049,9 @@
             console.log('📺 Video URL:', VIDEO_URL);
             console.log('🔒 Referer: REMOVED');
             console.log('💡 Click any key to copy');
-            console.log('⏱️ Lecture Duration: HH:MM:SS (from video)');
             console.log('⌨️ Press ENTER to verify key');
             console.log('🔄 Button: LIVE REFRESH');
-            console.log('🕐 Actual Time: REMOVED');
+            console.log('🚫 Suspend Mode: Set IS_SUSPENDED = true to disable website');
         });
 
         // ============================================================
