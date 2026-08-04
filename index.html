@@ -391,9 +391,7 @@
                 <button class="btn btn-live" onclick="loadLiveStream()">
                     <span class="pulse-ring"></span> लाइव देखें
                 </button>
-                <button class="btn btn-refresh" onclick="resetPlayer()">
-                    <i class="fas fa-sync-alt"></i> रिफ्रेश
-                </button>
+               
             </div>
 
             <!-- Status Bar -->
@@ -566,7 +564,7 @@
             player.ready(function() {
                 console.log('✅ Player Ready');
                 statusText.textContent = '✅ तैयार';
-                playerInfo.textContent = 'Video.js + hls.js';
+                playerInfo.textContent = 'Live Player';
                 showMessage('✅ प्लेयर तैयार है', 'success');
             });
 
