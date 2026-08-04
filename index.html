@@ -143,6 +143,12 @@
             gap: 15px;
         }
 
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .header h1 {
             font-size: 24px;
             font-weight: 700;
@@ -150,6 +156,23 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .class-name {
+            background: rgba(247, 151, 30, 0.15);
+            border: 1px solid rgba(247, 151, 30, 0.3);
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #f7971e;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .class-name i {
+            font-size: 14px;
         }
 
         .live-badge {
@@ -347,6 +370,8 @@
             .controls-bar { flex-direction: column; }
             .btn { justify-content: center; width: 100%; }
             .status-bar { flex-direction: column; align-items: flex-start; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .class-name { font-size: 12px; padding: 4px 12px; }
         }
     </style>
 </head>
@@ -371,9 +396,15 @@
         <!-- ========================================================== -->
         <div id="playerPage" class="hidden">
 
-            <!-- Header -->
+            <!-- Header with Live Class Name -->
             <div class="header">
-                <h1>📺 Live Stream</h1>
+                <div class="header-left">
+                    <h1>📺 Live Stream</h1>
+                    <span class="class-name" id="liveClassName">
+                        <i class="fas fa-chalkboard-teacher"></i> 
+                        <span id="classNameText">ClassPlus Live</span>
+                    </span>
+                </div>
                 <div class="live-badge">लाइव</div>
             </div>
 
@@ -391,7 +422,9 @@
                 <button class="btn btn-live" onclick="loadLiveStream()">
                     <span class="pulse-ring"></span> लाइव देखें
                 </button>
-               
+                <button class="btn btn-refresh" onclick="resetPlayer()">
+                    <i class="fas fa-sync-alt"></i> रिफ्रेश
+                </button>
             </div>
 
             <!-- Status Bar -->
@@ -432,48 +465,48 @@
          */
 
         // ============================================================
-        // 🔑 CONFIGURATION
+        // 🔑 CONFIGURATION - यहाँ सब कुछ बदलें
         // ============================================================
 
-        // ⭐⭐⭐ CHANGE THESE KEYS AS YOU WANT ⭐⭐⭐
-        // आप चाहें तो इनमें से किसी भी key को use कर सकते हैं
-// 🔑 30 Random One-Time Keys (8 characters each)
-// Copy and paste these into the VALID_KEYS array in your code
+        // ⭐⭐⭐ LIVE CLASS NAME - यहाँ Class का नाम डालें ⭐⭐⭐
+        const CLASS_NAME = "ClassPlus Live";
 
-const VALID_KEYS = [
-    'K7H9R2M4',
-    'X8P5L3N6',
-    'Q2W9E7R1',
-    'T5Y4U8I2',
-    'F9G7H3J5',
-    'B6V8C4X1',
-    'Z9M2N5P7',
-    'R4T8W3Q6',
-    'Y1U5I9O2',
-    'L3K8J6H4',
-    'D7A4F2G9',
-    'M8P3N6C2',
-    'V5B9T1E7',
-    'S4W7R8K2',
-    'J3H6L9N1',
-    'P8Q2M5T7',
-    'C6V9B4N2',
-    'F3R8K7W5',
-    'L9N2M6P4',
-    'G5T1E8S7',
-    'B7R4M9K2',
-    'X8W5P3N1',
-    'Q2T6V9C4',
-    'H5J8F3L7',
-    'Z6M2N9P4',
-    'R8W3Q7T5',
-    'Y4U9I2O7',
-    'L3K8J6H4',
-    'F9G7H3J5',
-    'P5N6M8C2'
-];
-        // Video URL - अपना REAL .m3u8 लिंक डालें
-        const VIDEO_URL = "https://vs.classplusapp.com/hls/6a7089aae86acfbc9dbb33f5/index.m3u8";
+        // ⭐⭐⭐ VIDEO URL - अपना REAL .m3u8 लिंक डालें ⭐⭐⭐
+        const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
+
+        // ⭐⭐⭐ 30 Random One-Time Keys ⭐⭐⭐
+        const VALID_KEYS = [
+            'K7H9R2M4',
+            'X8P5L3N6',
+            'Q2W9E7R1',
+            'T5Y4U8I2',
+            'F9G7H3J5',
+            'B6V8C4X1',
+            'Z9M2N5P7',
+            'R4T8W3Q6',
+            'Y1U5I9O2',
+            'L3K8J6H4',
+            'D7A4F2G9',
+            'M8P3N6C2',
+            'V5B9T1E7',
+            'S4W7R8K2',
+            'J3H6L9N1',
+            'P8Q2M5T7',
+            'C6V9B4N2',
+            'F3R8K7W5',
+            'L9N2M6P4',
+            'G5T1E8S7',
+            'B7R4M9K2',
+            'X8W5P3N1',
+            'Q2T6V9C4',
+            'H5J8F3L7',
+            'Z6M2N9P4',
+            'R8W3Q7T5',
+            'Y4U9I2O7',
+            'L3K8J6H4',
+            'F9G7H3J5',
+            'P5N6M8C2'
+        ];
 
         // ============================================================
         // 📦 DOM REFS
@@ -486,6 +519,12 @@ const VALID_KEYS = [
         const statusText = document.getElementById('statusText');
         const playerInfo = document.getElementById('playerInfo');
         const messageEl = document.getElementById('message');
+        const classNameText = document.getElementById('classNameText');
+
+        // ============================================================
+        // 🏷️ SET CLASS NAME
+        // ============================================================
+        classNameText.textContent = CLASS_NAME;
 
         // ============================================================
         // 🔐 VERIFICATION LOGIC
@@ -590,7 +629,7 @@ const VALID_KEYS = [
             player.ready(function() {
                 console.log('✅ Player Ready');
                 statusText.textContent = '✅ तैयार';
-                playerInfo.textContent = 'Live Player';
+                playerInfo.textContent = 'Video.js + hls.js';
                 showMessage('✅ प्लेयर तैयार है', 'success');
             });
 
@@ -679,6 +718,7 @@ const VALID_KEYS = [
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('✅ Secure Live Stream initialized!');
+            console.log('📚 Class Name:', CLASS_NAME);
             console.log('🔑 Valid Keys:', VALID_KEYS);
             console.log('📺 Video URL:', VIDEO_URL);
             console.log('🔒 Referer: REMOVED');
