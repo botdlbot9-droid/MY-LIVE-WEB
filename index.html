@@ -676,11 +676,11 @@
                 <div class="live-badge">लाइव</div>
             </div>
 
-            <!-- 🔥 TIMER BAR - 2 Hour Countdown -->
+            <!-- 🔥 TIMER BAR - 2 Minute Countdown (TEST MODE) -->
             <div class="timer-bar" id="timerBar">
                 <span class="timer-icon">⏳</span>
-                <span class="label">Time Remaining:</span>
-                <span class="value" id="timerDisplay">02:00:00</span>
+                <span class="label">⏱️ Session Time Remaining:</span>
+                <span class="value" id="timerDisplay">02:00</span>
             </div>
 
             <div class="player-wrapper">
@@ -741,8 +741,8 @@
          *  - User must enter valid 8-digit key
          *  - Key can be used only once (stored in localStorage)
          *  - Shows lecture duration in HH:MM:SS format (from video)
-         *  - ⏱️ 2 Hour Timer - Starts after verification
-         *  - When timer hits 00:00:00, asks for key again
+         *  - ⏱️ 2 Minute Timer (TEST MODE) - Starts after verification
+         *  - When timer hits 00:00, asks for key again
          *  - ✅ Enter key works on the input field
          * ================================================================
          */
@@ -754,8 +754,8 @@
         const CLASS_NAME = "ClassPlus Live";
         const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
 
-        // Timer duration in seconds (2 hours = 7200 seconds)
-        const TIMER_DURATION = 7200;
+        // ⭐⭐⭐ TEST MODE: 2 minutes (120 seconds) ⭐⭐⭐
+        const TIMER_DURATION = 120;
 
         // ⭐⭐⭐ 40 Random One-Time Keys ⭐⭐⭐
         const VALID_KEYS = [
@@ -853,8 +853,8 @@
                 localStorage.setItem('timerRemaining', timeRemaining.toString());
                 updateTimerDisplay();
                 
-                // Warning when less than 5 minutes
-                if (timeRemaining < 300) {
+                // Warning when less than 30 seconds
+                if (timeRemaining < 30) {
                     timerBar.classList.add('warning');
                 } else {
                     timerBar.classList.remove('warning');
@@ -874,11 +874,9 @@
         }
 
         function updateTimerDisplay() {
-            const hours = Math.floor(timeRemaining / 3600);
-            const minutes = Math.floor((timeRemaining % 3600) / 60);
+            const minutes = Math.floor(timeRemaining / 60);
             const seconds = timeRemaining % 60;
             timerDisplay.textContent = 
-                String(hours).padStart(2, '0') + ':' + 
                 String(minutes).padStart(2, '0') + ':' + 
                 String(seconds).padStart(2, '0');
         }
@@ -1243,7 +1241,7 @@
             console.log('✅ Secure Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
             console.log('🔑 Total Keys:', VALID_KEYS.length);
-            console.log('⏱️ Timer Duration: 2 Hours');
+            console.log('⏱️ Timer Duration: 2 Minutes (TEST MODE)');
             console.log('💡 Click any key to copy');
             console.log('⌨️ Press ENTER to verify key');
         });
