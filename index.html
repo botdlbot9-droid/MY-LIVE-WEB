@@ -6,9 +6,6 @@
     <title>Admin Panel - Video Control</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        /* ================================================================
-           CSS - Admin Panel Dark Theme
-           ================================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -222,6 +219,23 @@
             transform: none;
         }
 
+        .btn-blank {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn-blank:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(108, 92, 231, 0.5);
+        }
+
+        .btn-blank:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-refresh {
             background: #0f0f23;
             border: 1px solid #2a2a4e;
@@ -285,6 +299,31 @@
             margin-top: 8px;
         }
 
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #6a6a8a;
+            margin-top: 10px;
+        }
+
+        .connection-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .connection-status .dot.online {
+            background: #00ff88;
+        }
+
+        .connection-status .dot.offline {
+            background: #ff6b6b;
+        }
+
         @media (max-width: 480px) {
             .container { padding: 20px; }
             .btn { min-width: 100px; padding: 12px 20px; font-size: 14px; }
@@ -311,7 +350,13 @@
         <div id="adminPanel" class="hidden">
             <div class="admin-icon">🎬</div>
             <div class="admin-title">Video Control</div>
-            <div class="admin-subtitle">Play or pause the live stream remotely</div>
+            <div class="admin-subtitle">Control your live stream remotely</div>
+
+            <!-- Connection Status -->
+            <div class="connection-status">
+                <span class="dot online" id="connDot"></span>
+                <span id="connText">Connected to website</span>
+            </div>
 
             <!-- Status Box -->
             <div class="status-box">
@@ -329,6 +374,12 @@
                 <button class="btn btn-resume" id="resumeBtn" onclick="resumeVideo()">
                     ▶️ Play Video
                 </button>
+                <button class="btn btn-blank" id="blankBtn" onclick="showBlank()">
+                    📺 Show Blank
+                </button>
+                <button class="btn btn-resume" id="removeBlankBtn" onclick="removeBlank()">
+                    🖼️ Remove Blank
+                </button>
                 <button class="btn btn-refresh" onclick="fetchStatus()" title="Refresh Status">
                     🔄
                 </button>
@@ -341,7 +392,7 @@
             <div class="last-updated" id="lastUpdated">Last updated: --</div>
 
             <div class="footer">
-                ⚡ <span class="highlight">Remote Control</span> — API Based
+                ⚡ <span class="highlight">Remote Control</span> — GitHub Pages
             </div>
         </div>
 
@@ -350,10 +401,10 @@
     <script>
         /**
          * ================================================================
-         *  🎬 ADMIN PANEL - API Based Video Control
+         *  🎬 ADMIN PANEL - Complete Video Control
          *  - Password protected login
-         *  - Uses localStorage API to communicate with website
-         *  - Play/Pause video remotely
+         *  - Uses localStorage to communicate with website
+         *  - Play/Pause/Blank page control
          * ================================================================
          */
 
@@ -364,7 +415,7 @@
         // ⭐⭐⭐ CHANGE THIS PASSWORD ⭐⭐⭐
         const ADMIN_PASSWORD = "admin123";
 
-        // API endpoint (localStorage is used as API)
+        // API key for localStorage communication
         const API_KEY = 'videoStatus';
 
         // ============================================================
@@ -378,8 +429,12 @@
         const statusText = document.getElementById('statusText');
         const pauseBtn = document.getElementById('pauseBtn');
         const resumeBtn = document.getElementById('resumeBtn');
+        const blankBtn = document.getElementById('blankBtn');
+        const removeBlankBtn = document.getElementById('removeBlankBtn');
         const adminMessage = document.getElementById('adminMessage');
         const lastUpdated = document.getElementById('lastUpdated');
+        const connDot = document.getElementById('connDot');
+        const connText = document.getElementById('connText');
 
         // ============================================================
         // 🔐 LOGIN
@@ -393,8 +448,8 @@
                 adminPanel.classList.remove('hidden');
                 loginError.textContent = '';
                 fetchStatus();
-                // Auto refresh every 3 seconds
-                setInterval(fetchStatus, 3000);
+                // Auto refresh every 2 seconds
+                setInterval(fetchStatus, 2000);
             } else {
                 loginError.textContent = '❌ Invalid password! Please try again.';
                 passwordInput.value = '';
@@ -410,13 +465,16 @@
         });
 
         // ============================================================
-        // 📊 FETCH CURRENT STATUS (API Call)
+        // 📊 FETCH CURRENT STATUS
         // ============================================================
 
         function fetchStatus() {
-            // API call to get current status
             const status = localStorage.getItem(API_KEY) || 'playing';
             updateUI(status);
+            
+            // Update connection status
+            connDot.className = 'dot online';
+            connText.textContent = '✅ Connected to website';
         }
 
         function updateUI(status) {
@@ -425,16 +483,29 @@
                 statusText.className = 'value online';
                 pauseBtn.disabled = false;
                 resumeBtn.disabled = true;
+                blankBtn.disabled = false;
+                removeBlankBtn.disabled = true;
             } else if (status === 'paused') {
                 statusText.textContent = '⏸️ Paused';
                 statusText.className = 'value offline';
                 pauseBtn.disabled = true;
                 resumeBtn.disabled = false;
+                blankBtn.disabled = true;
+                removeBlankBtn.disabled = true;
+            } else if (status === 'blank') {
+                statusText.textContent = '📺 Blank Page';
+                statusText.className = 'value offline';
+                pauseBtn.disabled = true;
+                resumeBtn.disabled = true;
+                blankBtn.disabled = true;
+                removeBlankBtn.disabled = false;
             } else {
                 statusText.textContent = '⚠️ Unknown';
                 statusText.className = 'value';
                 pauseBtn.disabled = true;
                 resumeBtn.disabled = true;
+                blankBtn.disabled = true;
+                removeBlankBtn.disabled = true;
             }
 
             // Update last updated
@@ -446,7 +517,7 @@
         }
 
         // ============================================================
-        // ⏸️ PAUSE VIDEO (API Call)
+        // ⏸️ PAUSE VIDEO
         // ============================================================
 
         function pauseVideo() {
@@ -457,9 +528,8 @@
             showAdminMessage('⏳ Pausing video...', 'info');
 
             try {
-                // API call to set status to paused
                 localStorage.setItem(API_KEY, 'paused');
-                showAdminMessage('✅ Video paused! Website will show blank page.', 'success');
+                showAdminMessage('✅ Video paused!', 'success');
                 setTimeout(fetchStatus, 500);
             } catch (error) {
                 console.error('❌ Pause error:', error);
@@ -470,7 +540,7 @@
         }
 
         // ============================================================
-        // ▶️ RESUME VIDEO (API Call)
+        // ▶️ RESUME VIDEO
         // ============================================================
 
         function resumeVideo() {
@@ -481,15 +551,60 @@
             showAdminMessage('⏳ Resuming video...', 'info');
 
             try {
-                // API call to set status to playing
                 localStorage.setItem(API_KEY, 'playing');
-                showAdminMessage('✅ Video resumed! Website will show live stream.', 'success');
+                showAdminMessage('✅ Video resumed!', 'success');
                 setTimeout(fetchStatus, 500);
             } catch (error) {
                 console.error('❌ Resume error:', error);
                 showAdminMessage('❌ Failed to resume: ' + error.message, 'error');
                 resumeBtn.disabled = false;
                 resumeBtn.textContent = '▶️ Play Video';
+            }
+        }
+
+        // ============================================================
+        // 📺 SHOW BLANK PAGE
+        // ============================================================
+
+        function showBlank() {
+            if (blankBtn.disabled) return;
+
+            blankBtn.disabled = true;
+            blankBtn.textContent = '⏳ Processing...';
+            showAdminMessage('⏳ Showing blank page...', 'info');
+
+            try {
+                localStorage.setItem(API_KEY, 'blank');
+                showAdminMessage('✅ Blank page is now showing on website!', 'success');
+                setTimeout(fetchStatus, 500);
+            } catch (error) {
+                console.error('❌ Blank error:', error);
+                showAdminMessage('❌ Failed to show blank: ' + error.message, 'error');
+                blankBtn.disabled = false;
+                blankBtn.textContent = '📺 Show Blank';
+            }
+        }
+
+        // ============================================================
+        // 🖼️ REMOVE BLANK PAGE
+        // ============================================================
+
+        function removeBlank() {
+            if (removeBlankBtn.disabled) return;
+
+            removeBlankBtn.disabled = true;
+            removeBlankBtn.textContent = '⏳ Processing...';
+            showAdminMessage('⏳ Removing blank page...', 'info');
+
+            try {
+                localStorage.setItem(API_KEY, 'playing');
+                showAdminMessage('✅ Blank page removed! Video is back.', 'success');
+                setTimeout(fetchStatus, 500);
+            } catch (error) {
+                console.error('❌ Remove blank error:', error);
+                showAdminMessage('❌ Failed to remove blank: ' + error.message, 'error');
+                removeBlankBtn.disabled = false;
+                removeBlankBtn.textContent = '🖼️ Remove Blank';
             }
         }
 
@@ -509,8 +624,7 @@
 
         console.log('✅ Admin Panel loaded!');
         console.log('🔑 Password:', ADMIN_PASSWORD);
-        console.log('💡 Use "Pause" to show blank page on website');
-        console.log('💡 Use "Play" to show video on website');
+        console.log('💡 Controls: Pause | Play | Show Blank | Remove Blank');
         console.log('📡 API Key:', API_KEY);
     </script>
 
