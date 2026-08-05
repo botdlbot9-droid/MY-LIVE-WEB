@@ -598,7 +598,13 @@
             <div class="keys-container">
                 <div class="keys-title">🔑 Available Keys <span style="color:#6a6a8a;font-weight:400;">(Click to copy)</span></div>
                 <div class="keys-grid" id="adminKeyGrid"></div>
-                <button class="btn-generate" onclick="regenerateKeys()">🔄 Generate New Keys</button>
+                <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                    <button class="btn-generate" onclick="regenerateKeys()" style="flex:1;">🔄 Generate New Keys</button>
+                    <button class="btn-generate" onclick="syncKeysToDB()" style="flex:1; background: linear-gradient(135deg, #00b894, #00cec9);">💾 Sync Keys to DB</button>
+                </div>
+                <div style="font-size:11px; color:#6a6a8a; margin-top:5px; text-align:center;">
+                    <span id="keySyncStatus">Keys are synced with database</span>
+                </div>
             </div>
 
             <!-- ===== CONTROLS ===== -->
@@ -628,6 +634,7 @@
          *  - Set Class Name & Stream URL (saved to Cloudflare D1)
          *  - Refresh Users button (forces all users to reload)
          *  - 10 keys with regenerate button
+         *  - Sync Keys to Database (so new users can use them)
          *  - One-time use key system (FIXED)
          * ================================================================
          */
@@ -663,6 +670,7 @@
         const connDot = document.getElementById('connDot');
         const connText = document.getElementById('connText');
         const adminKeyGrid = document.getElementById('adminKeyGrid');
+        const keySyncStatus = document.getElementById('keySyncStatus');
 
         const classNameInput = document.getElementById('classNameInput');
         const streamUrlInput = document.getElementById('streamUrlInput');
@@ -689,7 +697,47 @@
             localStorage.setItem('validKeys', JSON.stringify(VALID_KEYS));
             localStorage.setItem('usedKeys', JSON.stringify([]));
             renderAdminKeys();
-            showAdminMessage('✅ 10 new keys generated!', 'success');
+            showAdminMessage('✅ 10 new keys generated! Click "Sync Keys to DB" to save.', 'success');
+            keySyncStatus.textContent = '⚠️ Keys not synced with database! Click "Sync Keys to DB"';
+            keySyncStatus.style.color = '#f7971e';
+        }
+
+        // ============================================================
+        // 💾 SYNC KEYS TO DATABASE
+        // ============================================================
+
+        async function syncKeysToDB() {
+            showAdminMessage('⏳ Syncing keys to database...', 'info');
+
+            try {
+                const response = await fetch(`${WORKER_URL}/sync-keys`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keys: VALID_KEYS })
+                });
+
+                if (!response.ok) throw new Error('Failed to sync keys');
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAdminMessage('✅ Keys synced to database successfully!', 'success');
+                    keySyncStatus.textContent = '✅ Keys are synced with database';
+                    keySyncStatus.style.color = '#00ff88';
+                    // Update used keys in DB as well
+                    const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
+                    await fetch(`${WORKER_URL}/sync-used-keys`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ usedKeys: usedKeys })
+                    });
+                } else {
+                    throw new Error('API returned error');
+                }
+            } catch (error) {
+                console.error('❌ Sync error:', error);
+                showAdminMessage(`❌ Failed to sync keys: ${error.message}`, 'error');
+            }
         }
 
         // ============================================================
@@ -707,6 +755,8 @@
                 renderAdminKeys();
                 fetchStatus();
                 setInterval(fetchStatus, 3000);
+                // Check key sync status
+                checkKeySyncStatus();
             } else {
                 loginError.textContent = '❌ Invalid password!';
                 passwordInput.value = '';
@@ -778,7 +828,29 @@
         }
 
         // ============================================================
-        // 🎬 APPLY STREAM CONFIG (Save to DB via Worker)
+        // 🔄 CHECK KEY SYNC STATUS
+        // ============================================================
+
+        async function checkKeySyncStatus() {
+            try {
+                const response = await fetch(`${WORKER_URL}/get-keys`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                if (data.keys && JSON.stringify(data.keys) === JSON.stringify(VALID_KEYS)) {
+                    keySyncStatus.textContent = '✅ Keys are synced with database';
+                    keySyncStatus.style.color = '#00ff88';
+                } else {
+                    keySyncStatus.textContent = '⚠️ Keys not synced with database! Click "Sync Keys to DB"';
+                    keySyncStatus.style.color = '#f7971e';
+                }
+            } catch (error) {
+                console.error('❌ Key sync check error:', error);
+            }
+        }
+
+        // ============================================================
+        // 🎬 APPLY STREAM CONFIG
         // ============================================================
 
         async function applyStreamConfig() {
@@ -793,7 +865,6 @@
             showAdminMessage('⏳ Saving config to database...', 'info');
 
             try {
-                // Save config to Cloudflare D1 via Worker
                 const response = await fetch(`${WORKER_URL}/update-config`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -809,7 +880,6 @@
 
                 if (data.success) {
                     showAdminMessage(`✅ Config saved to database! Class: ${className}`, 'success');
-                    // Also save locally for immediate use
                     localStorage.setItem('adminClassName', className);
                     localStorage.setItem('adminStreamUrl', streamUrl);
                 } else {
@@ -817,7 +887,6 @@
                 }
             } catch (error) {
                 console.error('❌ Config save error:', error);
-                // Fallback: save locally only
                 localStorage.setItem('adminClassName', className);
                 localStorage.setItem('adminStreamUrl', streamUrl);
                 showAdminMessage(`⚠️ Saved locally only (DB error: ${error.message})`, 'error');
@@ -825,14 +894,13 @@
         }
 
         // ============================================================
-        // 🔄 REFRESH ALL USERS (Force reload via DB flag)
+        // 🔄 REFRESH ALL USERS
         // ============================================================
 
         async function refreshAllUsers() {
             showAdminMessage('⏳ Sending refresh signal to all users...', 'info');
 
             try {
-                // Set refresh flag in DB
                 const response = await fetch(`${WORKER_URL}/set-refresh`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -845,7 +913,6 @@
 
                 if (data.success) {
                     showAdminMessage('✅ Refresh signal sent! All users will reload.', 'success');
-                    // Clear refresh flag after 2 seconds
                     setTimeout(async () => {
                         await fetch(`${WORKER_URL}/set-refresh`, {
                             method: 'POST',
