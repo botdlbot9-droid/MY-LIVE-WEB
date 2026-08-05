@@ -207,6 +207,25 @@
             box-shadow: 0 8px 30px rgba(0, 206, 201, 0.3);
         }
 
+        .btn-refresh-users {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #0a0a12;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-refresh-users:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
+        }
+
         /* ===== STATUS BOX ===== */
         .status-box {
             background: rgba(18, 18, 30, 0.6);
@@ -295,9 +314,29 @@
             border-color: #3a3a5e;
             cursor: not-allowed;
             opacity: 0.5;
+            text-decoration: line-through;
         }
 
-        /* ===== BUTTONS ===== */
+        .btn-generate {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #0a0a12;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-generate:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
+        }
+
+        /* ===== CONTROLS ===== */
         .btn-group {
             display: flex;
             gap: 10px;
@@ -539,6 +578,14 @@
                 </div>
             </div>
 
+            <!-- ===== REFRESH USERS BUTTON ===== -->
+            <div class="config-section">
+                <button class="btn-refresh-users" onclick="refreshAllUsers()">🔄 Refresh All Users</button>
+                <div style="font-size:11px; color:#6a6a8a; margin-top:5px; text-align:center;">
+                    This will force all users' browsers to reload and get the latest stream config
+                </div>
+            </div>
+
             <!-- ===== STATUS ===== -->
             <div class="status-box">
                 <div class="label">📊 Current Status</div>
@@ -551,6 +598,7 @@
             <div class="keys-container">
                 <div class="keys-title">🔑 Available Keys <span style="color:#6a6a8a;font-weight:400;">(Click to copy)</span></div>
                 <div class="keys-grid" id="adminKeyGrid"></div>
+                <button class="btn-generate" onclick="regenerateKeys()">🔄 Generate New Keys</button>
             </div>
 
             <!-- ===== CONTROLS ===== -->
@@ -575,13 +623,12 @@
     <script>
         /**
          * ================================================================
-         *  🎬 ADMIN PANEL - Full Control
+         *  🎬 ADMIN PANEL - Full Control with DB Sync
          *  - Password protected login
-         *  - Set Class Name
-         *  - Set Stream URL
-         *  - 10 keys visible
-         *  - Pause/Play/Blank Page controls
-         *  - Cross-device communication
+         *  - Set Class Name & Stream URL (saved to Cloudflare D1)
+         *  - Refresh Users button (forces all users to reload)
+         *  - 10 keys with regenerate button
+         *  - One-time use key system (FIXED)
          * ================================================================
          */
 
@@ -592,8 +639,8 @@
         const ADMIN_PASSWORD = "admin123";
         const WORKER_URL = "https://hls-d1-api.bbro75574-4c4.workers.dev";
 
-        // ⭐⭐⭐ 10 KEYS ⭐⭐⭐
-        const VALID_KEYS = [
+        // ⭐⭐⭐ 10 KEYS (Default) ⭐⭐⭐
+        let VALID_KEYS = [
             'K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
             'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4'
         ];
@@ -621,6 +668,31 @@
         const streamUrlInput = document.getElementById('streamUrlInput');
 
         // ============================================================
+        // 🔑 KEY GENERATION
+        // ============================================================
+
+        function generateRandomKey() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let key = '';
+            for (let i = 0; i < 8; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return key;
+        }
+
+        function regenerateKeys() {
+            const newKeys = [];
+            for (let i = 0; i < 10; i++) {
+                newKeys.push(generateRandomKey());
+            }
+            VALID_KEYS = newKeys;
+            localStorage.setItem('validKeys', JSON.stringify(VALID_KEYS));
+            localStorage.setItem('usedKeys', JSON.stringify([]));
+            renderAdminKeys();
+            showAdminMessage('✅ 10 new keys generated!', 'success');
+        }
+
+        // ============================================================
         // 🔐 LOGIN
         // ============================================================
 
@@ -631,11 +703,12 @@
                 loginPage.classList.add('hidden');
                 adminPanel.classList.remove('hidden');
                 loginError.textContent = '';
+                loadKeysFromStorage();
                 renderAdminKeys();
                 fetchStatus();
                 setInterval(fetchStatus, 3000);
             } else {
-                loginError.textContent = '❌ Invalid password! Please try again.';
+                loginError.textContent = '❌ Invalid password!';
                 passwordInput.value = '';
                 passwordInput.focus();
             }
@@ -646,11 +719,29 @@
         });
 
         // ============================================================
+        // 💾 LOAD KEYS FROM STORAGE
+        // ============================================================
+
+        function loadKeysFromStorage() {
+            const savedKeys = localStorage.getItem('validKeys');
+            if (savedKeys) {
+                try {
+                    const parsed = JSON.parse(savedKeys);
+                    if (Array.isArray(parsed) && parsed.length === 10) {
+                        VALID_KEYS = parsed;
+                    }
+                } catch (e) { /* ignore */ }
+            }
+        }
+
+        // ============================================================
         // 🔑 RENDER ADMIN KEYS
         // ============================================================
+
         function renderAdminKeys() {
             const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
             adminKeyGrid.innerHTML = '';
+
             VALID_KEYS.forEach(key => {
                 const el = document.createElement('div');
                 el.className = 'key-item';
@@ -658,37 +749,39 @@
                     el.classList.add('used');
                 }
                 el.textContent = key;
-                el.title = usedKeys.includes(key) ? 'This key has already been used' : 'Click to copy';
+                el.title = usedKeys.includes(key) ? '❌ Already used!' : 'Click to copy';
+
                 el.addEventListener('click', function() {
-                    if (!usedKeys.includes(key)) {
-                        navigator.clipboard.writeText(key).then(() => {
-                            el.classList.add('copied');
-                            setTimeout(() => { el.classList.remove('copied'); }, 800);
-                            showAdminMessage(`✅ Key copied: ${key}`, 'success');
-                        }).catch(() => {
-                            const textArea = document.createElement('textarea');
-                            textArea.value = key;
-                            document.body.appendChild(textArea);
-                            textArea.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(textArea);
-                            el.classList.add('copied');
-                            setTimeout(() => { el.classList.remove('copied'); }, 800);
-                            showAdminMessage(`✅ Key copied: ${key}`, 'success');
-                        });
-                    } else {
+                    if (usedKeys.includes(key)) {
                         showAdminMessage('❌ This key has already been used!', 'error');
+                        return;
                     }
+                    navigator.clipboard.writeText(key).then(() => {
+                        el.classList.add('copied');
+                        setTimeout(() => { el.classList.remove('copied'); }, 800);
+                        showAdminMessage(`✅ Key copied: ${key}`, 'success');
+                    }).catch(() => {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = key;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        el.classList.add('copied');
+                        setTimeout(() => { el.classList.remove('copied'); }, 800);
+                        showAdminMessage(`✅ Key copied: ${key}`, 'success');
+                    });
                 });
+
                 adminKeyGrid.appendChild(el);
             });
         }
 
         // ============================================================
-        // 🎬 APPLY STREAM CONFIG
+        // 🎬 APPLY STREAM CONFIG (Save to DB via Worker)
         // ============================================================
 
-        function applyStreamConfig() {
+        async function applyStreamConfig() {
             const className = classNameInput.value.trim() || "ClassPlus Live";
             const streamUrl = streamUrlInput.value.trim();
 
@@ -697,17 +790,76 @@
                 return;
             }
 
-            // Save to localStorage
-            localStorage.setItem('adminClassName', className);
-            localStorage.setItem('adminStreamUrl', streamUrl);
+            showAdminMessage('⏳ Saving config to database...', 'info');
 
-            showAdminMessage(`✅ Stream config applied! Class: ${className}`, 'success');
+            try {
+                // Save config to Cloudflare D1 via Worker
+                const response = await fetch(`${WORKER_URL}/update-config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        className: className,
+                        streamUrl: streamUrl
+                    })
+                });
 
-            // Also update the website via worker if needed
-            // (Website will pick up changes from localStorage on its own)
+                if (!response.ok) throw new Error('Failed to save config');
 
-            console.log('📺 Class Name:', className);
-            console.log('🔗 Stream URL:', streamUrl);
+                const data = await response.json();
+
+                if (data.success) {
+                    showAdminMessage(`✅ Config saved to database! Class: ${className}`, 'success');
+                    // Also save locally for immediate use
+                    localStorage.setItem('adminClassName', className);
+                    localStorage.setItem('adminStreamUrl', streamUrl);
+                } else {
+                    throw new Error('API returned error');
+                }
+            } catch (error) {
+                console.error('❌ Config save error:', error);
+                // Fallback: save locally only
+                localStorage.setItem('adminClassName', className);
+                localStorage.setItem('adminStreamUrl', streamUrl);
+                showAdminMessage(`⚠️ Saved locally only (DB error: ${error.message})`, 'error');
+            }
+        }
+
+        // ============================================================
+        // 🔄 REFRESH ALL USERS (Force reload via DB flag)
+        // ============================================================
+
+        async function refreshAllUsers() {
+            showAdminMessage('⏳ Sending refresh signal to all users...', 'info');
+
+            try {
+                // Set refresh flag in DB
+                const response = await fetch(`${WORKER_URL}/set-refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh: true })
+                });
+
+                if (!response.ok) throw new Error('Failed to send refresh signal');
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAdminMessage('✅ Refresh signal sent! All users will reload.', 'success');
+                    // Clear refresh flag after 2 seconds
+                    setTimeout(async () => {
+                        await fetch(`${WORKER_URL}/set-refresh`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ refresh: false })
+                        });
+                    }, 2000);
+                } else {
+                    throw new Error('API returned error');
+                }
+            } catch (error) {
+                console.error('❌ Refresh error:', error);
+                showAdminMessage(`❌ Failed to send refresh signal: ${error.message}`, 'error');
+            }
         }
 
         // ============================================================
@@ -859,13 +1011,13 @@
             if (savedStreamUrl) {
                 streamUrlInput.value = savedStreamUrl;
             }
+
+            loadKeysFromStorage();
         });
 
         console.log('✅ Admin Panel loaded!');
         console.log('🔑 Password:', ADMIN_PASSWORD);
         console.log('📡 API:', WORKER_URL);
-        console.log('🔑 10 Keys visible to admin');
-        console.log('📺 Set class name and stream URL from admin panel');
     </script>
 
 </body>
