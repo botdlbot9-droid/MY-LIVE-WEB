@@ -8,535 +8,71 @@
     <script src="https://unpkg.com/video.js@8/dist/video.min.js"></script>
     <script src="https://unpkg.com/@videojs/http-streaming@3/dist/videojs-http-streaming.min.js"></script>
     <style>
-        /* ================================================================
-           CSS - Premium Dark Theme
-           ================================================================ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a12;
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background-image: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, #0a0a12 70%);
-        }
-
-        .container {
-            max-width: 1100px;
-            width: 100%;
-            background: rgba(26, 26, 46, 0.85);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 30px;
-            border: 1px solid rgba(42, 42, 78, 0.6);
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* ===== VERIFICATION PAGE ===== */
-        #verificationPage {
-            max-width: 500px;
-            margin: 60px auto;
-            text-align: center;
-        }
-
-        .verify-icon {
-            font-size: 70px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .verify-title {
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .verify-subtitle {
-            color: #a0a0b8;
-            font-size: 16px;
-            margin-bottom: 30px;
-        }
-
-        .verify-input {
-            width: 100%;
-            padding: 16px 20px;
-            border-radius: 12px;
-            border: 2px solid #2a2a4e;
-            background: #0f0f23;
-            color: #fff;
-            font-size: 20px;
-            text-align: center;
-            letter-spacing: 8px;
-            font-weight: 700;
-            outline: none;
-            transition: 0.3s;
-            font-family: 'Courier New', monospace;
-        }
-
-        .verify-input:focus {
-            border-color: #f7971e;
-            box-shadow: 0 0 30px rgba(247, 151, 30, 0.15);
-        }
-
-        .verify-input::placeholder {
-            letter-spacing: 0;
-            font-weight: 400;
-            color: #6a6a8a;
-            font-size: 14px;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        .verify-btn {
-            width: 100%;
-            padding: 16px;
-            margin-top: 18px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            color: #0a0a12;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        .verify-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 40px rgba(247, 151, 30, 0.35);
-        }
-
-        .verify-error {
-            color: #ff6b6b;
-            font-size: 14px;
-            margin-top: 12px;
-            min-height: 20px;
-        }
-
-        .verify-success {
-            color: #00ff88;
-            font-size: 14px;
-            margin-top: 12px;
-            min-height: 20px;
-        }
-
-        .toast-message {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #00ff88;
-            color: #0a0a12;
-            padding: 14px 30px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 15px;
-            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.3);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            z-index: 9999;
-            pointer-events: none;
-        }
-
-        .toast-message.show {
-            opacity: 1;
-        }
-
-        /* ===== PLAYER PAGE ===== */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .class-name {
-            background: rgba(247, 151, 30, 0.15);
-            border: 1px solid rgba(247, 151, 30, 0.3);
-            padding: 6px 18px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #f7971e;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .live-badge {
-            background: #ff0044;
-            padding: 6px 18px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #fff;
-            animation: blink 1.2s infinite;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .live-badge::before {
-            content: "●";
-            font-size: 16px;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(0.8); }
-        }
-
-        /* ===== TIMER BAR ===== */
-        .timer-bar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            padding: 14px 20px;
-            background: rgba(18, 18, 30, 0.6);
-            border-radius: 12px;
-            border: 1px solid #2a2a4e;
-            margin-bottom: 16px;
-            backdrop-filter: blur(10px);
-        }
-
-        .timer-bar .label {
-            color: #a0a0b8;
-            font-size: 14px;
-        }
-
-        .timer-bar .value {
-            font-weight: 700;
-            color: #00ff88;
-            font-family: 'Courier New', monospace;
-            font-size: 28px;
-            letter-spacing: 3px;
-            min-width: 120px;
-            text-align: center;
-        }
-
-        .timer-bar .timer-icon {
-            color: #ff0044;
-            animation: pulse 1.5s infinite;
-            font-size: 20px;
-        }
-
-        .timer-bar.warning .value {
-            color: #ff6b6b;
-            animation: blink 0.5s infinite;
-        }
-
-        /* ===== VIDEO PLAYER ===== */
-        .player-wrapper {
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            aspect-ratio: 16 / 9;
-            width: 100%;
-            margin-bottom: 20px;
-            border: 1px solid #2a2a4e;
-        }
-
-        #my-video {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* ===== CONTROLS ===== */
-        .controls-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: center;
-            justify-content: center;
-            background: rgba(18, 18, 30, 0.6);
-            padding: 14px 18px;
-            border-radius: 12px;
-            border: 1px solid #2a2a4e;
-            margin-bottom: 16px;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn {
-            padding: 12px 36px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        .btn-live {
-            background: linear-gradient(135deg, #ff0044, #cc0033);
-            color: #fff;
-            box-shadow: 0 4px 20px rgba(255, 0, 68, 0.3);
-        }
-
-        .btn-live:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 30px rgba(255, 0, 68, 0.5);
-        }
-
-        .btn-live .pulse-ring {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            border-radius: 50%;
-            animation: pulse-ring 1.5s infinite;
-        }
-
-        @keyframes pulse-ring {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-        }
-
-        /* ===== DURATION BAR ===== */
-        .duration-bar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            background: rgba(18, 18, 30, 0.6);
-            border-radius: 12px;
-            border: 1px solid #2a2a4e;
-            margin-bottom: 16px;
-            backdrop-filter: blur(10px);
-        }
-
-        .duration-bar .label {
-            color: #a0a0b8;
-            font-size: 14px;
-        }
-
-        .duration-bar .value {
-            font-weight: 700;
-            color: #f7971e;
-            font-family: 'Courier New', monospace;
-            font-size: 18px;
-            letter-spacing: 2px;
-            min-width: 100px;
-            text-align: center;
-        }
-
-        .duration-bar .live-icon {
-            color: #ff0044;
-            animation: pulse 1.5s infinite;
-        }
-
-        /* ===== STATUS BAR ===== */
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding: 12px 16px;
-            background: rgba(18, 18, 30, 0.6);
-            border-radius: 12px;
-            border: 1px solid #2a2a4e;
-            margin-bottom: 16px;
-            backdrop-filter: blur(10px);
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-        }
-
-        .status-item .label {
-            color: #a0a0b8;
-        }
-
-        .status-item .value {
-            font-weight: 600;
-            color: #00ff88;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #00ff88;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 1.5s infinite;
-        }
-
-        /* ===== BLANK OVERLAY ===== */
-        #blankOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a12;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            padding: 20px;
-            text-align: center;
-        }
-
-        #blankOverlay.show {
-            display: flex;
-        }
-
-        #blankOverlay .blank-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-
-        #blankOverlay .blank-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: #6a6a8a;
-            margin-bottom: 10px;
-        }
-
-        #blankOverlay .blank-subtitle {
-            color: #3a3a4e;
-            font-size: 16px;
-        }
-
-        /* ===== REMOTE STATUS ===== */
-        .remote-status {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 16px;
-            background: rgba(15, 15, 35, 0.6);
-            border-radius: 8px;
-            border: 1px solid #2a2a4e;
-            margin-bottom: 12px;
-            font-size: 12px;
-            color: #a0a0b8;
-            backdrop-filter: blur(10px);
-        }
-
-        .remote-status .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .remote-status .dot.online {
-            background: #00ff88;
-        }
-
-        .remote-status .dot.offline {
-            background: #ff6b6b;
-        }
-
-        /* ===== MESSAGE ===== */
-        .message {
-            font-size: 14px;
-            padding: 10px 16px;
-            border-radius: 8px;
-            display: none;
-            margin-bottom: 12px;
-        }
-
-        .message.show {
-            display: block;
-        }
-
-        .message.error {
-            color: #ff6b6b;
-            background: rgba(255, 0, 0, 0.08);
-            border-left: 3px solid #ff6b6b;
-        }
-
-        .message.success {
-            color: #00ff88;
-            background: rgba(0, 255, 136, 0.08);
-            border-left: 3px solid #00ff88;
-        }
-
-        .message.info {
-            color: #f7971e;
-            background: rgba(247, 151, 30, 0.08);
-            border-left: 3px solid #f7971e;
-        }
-
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            color: #6a6a8a;
-            font-size: 13px;
-            border-top: 1px solid #1a1a3e;
-            padding-top: 18px;
-        }
-
-        .footer .highlight {
-            color: #f7971e;
-        }
-
-        @media (max-width: 768px) {
-            .container { padding: 16px; }
-            .header { flex-direction: column; align-items: flex-start; }
-            .timer-bar .value { font-size: 20px; min-width: 90px; }
-            .timer-bar { flex-wrap: wrap; }
-            .btn { width: 100%; justify-content: center; }
-            .controls-bar { flex-direction: column; }
-            .status-bar { flex-direction: column; align-items: flex-start; }
-            .verify-title { font-size: 24px; }
-            #blankOverlay .blank-title { font-size: 24px; }
-        }
+        /* ===== CSS - Same as before ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a12; color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; background-image: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, #0a0a12 70%); }
+        .container { max-width: 1100px; width: 100%; background: rgba(26,26,46,0.85); backdrop-filter: blur(20px); border-radius: 24px; padding: 30px; border: 1px solid rgba(42,42,78,0.6); box-shadow: 0 30px 80px rgba(0,0,0,0.8); }
+        .hidden { display: none !important; }
+        #verificationPage { max-width: 500px; margin: 60px auto; text-align: center; }
+        .verify-icon { font-size: 70px; margin-bottom: 20px; background: linear-gradient(135deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .verify-title { font-size: 32px; font-weight: 800; margin-bottom: 10px; background: linear-gradient(135deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .verify-subtitle { color: #a0a0b8; font-size: 16px; margin-bottom: 30px; }
+        .verify-input { width: 100%; padding: 16px 20px; border-radius: 12px; border: 2px solid #2a2a4e; background: #0f0f23; color: #fff; font-size: 20px; text-align: center; letter-spacing: 8px; font-weight: 700; outline: none; transition: 0.3s; font-family: 'Courier New', monospace; }
+        .verify-input:focus { border-color: #f7971e; box-shadow: 0 0 30px rgba(247,151,30,0.15); }
+        .verify-input::placeholder { letter-spacing: 0; font-weight: 400; color: #6a6a8a; font-size: 14px; font-family: 'Segoe UI', sans-serif; }
+        .verify-btn { width: 100%; padding: 16px; margin-top: 18px; border: none; border-radius: 12px; background: linear-gradient(135deg, #f7971e, #ffd200); color: #0a0a12; font-size: 18px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .verify-btn:hover { transform: scale(1.02); box-shadow: 0 8px 40px rgba(247,151,30,0.35); }
+        .verify-error { color: #ff6b6b; font-size: 14px; margin-top: 12px; min-height: 20px; }
+        .verify-success { color: #00ff88; font-size: 14px; margin-top: 12px; min-height: 20px; }
+        .toast-message { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #00ff88; color: #0a0a12; padding: 14px 30px; border-radius: 12px; font-weight: 700; font-size: 15px; box-shadow: 0 10px 40px rgba(0,255,136,0.3); opacity: 0; transition: opacity 0.4s ease; z-index: 9999; pointer-events: none; }
+        .toast-message.show { opacity: 1; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header h1 { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .class-name { background: rgba(247,151,30,0.15); border: 1px solid rgba(247,151,30,0.3); padding: 6px 18px; border-radius: 50px; font-size: 13px; font-weight: 600; color: #f7971e; display: inline-flex; align-items: center; gap: 8px; }
+        .live-badge { background: #ff0044; padding: 6px 18px; border-radius: 50px; font-size: 13px; font-weight: 700; color: #fff; animation: blink 1.2s infinite; display: flex; align-items: center; gap: 8px; }
+        .live-badge::before { content: "●"; font-size: 16px; animation: pulse 1s infinite; }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.8); } }
+        .timer-bar { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 14px 20px; background: rgba(18,18,30,0.6); border-radius: 12px; border: 1px solid #2a2a4e; margin-bottom: 16px; backdrop-filter: blur(10px); }
+        .timer-bar .label { color: #a0a0b8; font-size: 14px; }
+        .timer-bar .value { font-weight: 700; color: #00ff88; font-family: 'Courier New', monospace; font-size: 28px; letter-spacing: 3px; min-width: 120px; text-align: center; }
+        .timer-bar .timer-icon { color: #ff0044; animation: pulse 1.5s infinite; font-size: 20px; }
+        .timer-bar.warning .value { color: #ff6b6b; animation: blink 0.5s infinite; }
+        .player-wrapper { background: #000; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; width: 100%; margin-bottom: 20px; border: 1px solid #2a2a4e; }
+        #my-video { width: 100%; height: 100%; display: block; }
+        .controls-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; background: rgba(18,18,30,0.6); padding: 14px 18px; border-radius: 12px; border: 1px solid #2a2a4e; margin-bottom: 16px; backdrop-filter: blur(10px); }
+        .btn { padding: 12px 36px; border: none; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 10px; font-family: 'Segoe UI', sans-serif; }
+        .btn-live { background: linear-gradient(135deg, #ff0044, #cc0033); color: #fff; box-shadow: 0 4px 20px rgba(255,0,68,0.3); }
+        .btn-live:hover { transform: scale(1.05); box-shadow: 0 8px 30px rgba(255,0,68,0.5); }
+        .btn-live .pulse-ring { display: inline-block; width: 12px; height: 12px; background: #fff; border-radius: 50%; animation: pulse-ring 1.5s infinite; }
+        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); } 70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
+        .duration-bar { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 10px 16px; background: rgba(18,18,30,0.6); border-radius: 12px; border: 1px solid #2a2a4e; margin-bottom: 16px; backdrop-filter: blur(10px); }
+        .duration-bar .label { color: #a0a0b8; font-size: 14px; }
+        .duration-bar .value { font-weight: 700; color: #f7971e; font-family: 'Courier New', monospace; font-size: 18px; letter-spacing: 2px; min-width: 100px; text-align: center; }
+        .duration-bar .live-icon { color: #ff0044; animation: pulse 1.5s infinite; }
+        .status-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 16px; background: rgba(18,18,30,0.6); border-radius: 12px; border: 1px solid #2a2a4e; margin-bottom: 16px; backdrop-filter: blur(10px); }
+        .status-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .status-item .label { color: #a0a0b8; }
+        .status-item .value { font-weight: 600; color: #00ff88; }
+        .status-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
+        #blankOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a12; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; padding: 20px; text-align: center; }
+        #blankOverlay.show { display: flex; }
+        #blankOverlay .blank-icon { font-size: 80px; margin-bottom: 20px; }
+        #blankOverlay .blank-title { font-size: 32px; font-weight: 700; color: #6a6a8a; margin-bottom: 10px; }
+        #blankOverlay .blank-subtitle { color: #3a3a4e; font-size: 16px; }
+        .remote-status { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 8px 16px; background: rgba(15,15,35,0.6); border-radius: 8px; border: 1px solid #2a2a4e; margin-bottom: 12px; font-size: 12px; color: #a0a0b8; backdrop-filter: blur(10px); }
+        .remote-status .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .remote-status .dot.online { background: #00ff88; }
+        .remote-status .dot.offline { background: #ff6b6b; }
+        .message { font-size: 14px; padding: 10px 16px; border-radius: 8px; display: none; margin-bottom: 12px; }
+        .message.show { display: block; }
+        .message.error { color: #ff6b6b; background: rgba(255,0,0,0.08); border-left: 3px solid #ff6b6b; }
+        .message.success { color: #00ff88; background: rgba(0,255,136,0.08); border-left: 3px solid #00ff88; }
+        .message.info { color: #f7971e; background: rgba(247,151,30,0.08); border-left: 3px solid #f7971e; }
+        .footer { margin-top: 20px; text-align: center; color: #6a6a8a; font-size: 13px; border-top: 1px solid #1a1a3e; padding-top: 18px; }
+        .footer .highlight { color: #f7971e; }
+        @media (max-width:768px) { .container { padding: 16px; } .header { flex-direction: column; align-items: flex-start; } .timer-bar .value { font-size: 20px; min-width: 90px; } .timer-bar { flex-wrap: wrap; } .btn { width:100%; justify-content:center; } .controls-bar { flex-direction: column; } .status-bar { flex-direction: column; align-items: flex-start; } .verify-title { font-size: 24px; } #blankOverlay .blank-title { font-size: 24px; } }
     </style>
 </head>
 <body>
@@ -644,12 +180,11 @@
         /**
          * ================================================================
          *  🔐 LIVE STREAM - One-Time Key + Remote Config + Auto Refresh
-         *  - Keys hidden from users (only admin knows)
+         *  - Keys loaded from Cloudflare D1 database
          *  - ONE-TIME USE: Keys cannot be reused
-         *  - Admin can generate new keys from admin panel
+         *  - Admin can generate and sync new keys
          *  - Auto-refresh when admin changes config
          *  - 2 Hour Timer
-         *  - Cross-device remote control
          * ================================================================
          */
 
@@ -664,23 +199,8 @@
         const TIMER_DURATION = 7200;
         const REMOTE_CHECK_INTERVAL = 3000;
 
-        // ⭐⭐⭐ LOAD KEYS FROM ADMIN PANEL ⭐⭐⭐
-        let VALID_KEYS = ['K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
-            'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4'
-        ];
-
-        // Load keys from localStorage (admin panel saves here)
-        function loadKeysFromStorage() {
-            const savedKeys = localStorage.getItem('validKeys');
-            if (savedKeys) {
-                try {
-                    const parsed = JSON.parse(savedKeys);
-                    if (Array.isArray(parsed) && parsed.length === 10) {
-                        VALID_KEYS = parsed;
-                    }
-                } catch (e) { /* ignore */ }
-            }
-        }
+        // ⭐⭐⭐ KEYS LOADED FROM DATABASE ⭐⭐⭐
+        let VALID_KEYS = [];
 
         // ============================================================
         // 📦 DOM REFS
@@ -707,6 +227,31 @@
         let timeRemaining = TIMER_DURATION;
         let isTimerRunning = false;
         let sessionKey = null;
+
+        // ============================================================
+        // 🔑 LOAD KEYS FROM DATABASE (for new users)
+        // ============================================================
+
+        async function loadKeysFromDB() {
+            try {
+                const response = await fetch(`${WORKER_URL}/get-keys`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                if (data.keys && data.keys.length === 10) {
+                    VALID_KEYS = data.keys;
+                    localStorage.setItem('validKeys', JSON.stringify(VALID_KEYS));
+                    console.log('✅ Keys loaded from database:', VALID_KEYS);
+                    return true;
+                } else {
+                    console.warn('⚠️ No valid keys found in database, using fallback');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Failed to load keys from DB:', error);
+                return false;
+            }
+        }
 
         // ============================================================
         // 🏷️ LOAD ADMIN CONFIG FROM DB
@@ -755,7 +300,6 @@
 
                 if (data.refresh === true) {
                     console.log('🔄 Refresh signal received! Reloading page to get latest config...');
-                    // Reload the page to get latest config
                     window.location.reload();
                 }
             } catch (error) {
@@ -764,19 +308,7 @@
         }
 
         // ============================================================
-        // 🔔 TOAST
-        // ============================================================
-        let toastTimer = null;
-
-        function showToast(message) {
-            toast.textContent = message;
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 2000);
-        }
-
-        // ============================================================
-        // 🔐 VERIFICATION - ONE-TIME USE FIXED
+        // 🔐 VERIFICATION - ONE-TIME USE
         // ============================================================
 
         function verifyKey() {
@@ -794,9 +326,6 @@
                 return;
             }
 
-            // Load fresh keys from storage (in case admin regenerated)
-            loadKeysFromStorage();
-
             // Check if key has already been used
             const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
             if (usedKeys.includes(enteredKey)) {
@@ -812,6 +341,9 @@
                 // Mark key as used
                 usedKeys.push(enteredKey);
                 localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
+
+                // Sync used keys to DB
+                syncUsedKeysToDB(usedKeys);
 
                 sessionKey = enteredKey;
                 localStorage.setItem('sessionKey', sessionKey);
@@ -835,6 +367,23 @@
                 verifyMessage.className = 'verify-error';
                 keyInput.value = '';
                 keyInput.focus();
+            }
+        }
+
+        // ============================================================
+        // 💾 SYNC USED KEYS TO DATABASE
+        // ============================================================
+
+        async function syncUsedKeysToDB(usedKeys) {
+            try {
+                await fetch(`${WORKER_URL}/sync-used-keys`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usedKeys: usedKeys })
+                });
+                console.log('✅ Used keys synced to database');
+            } catch (error) {
+                console.error('❌ Failed to sync used keys:', error);
             }
         }
 
@@ -1109,52 +658,53 @@
         // ============================================================
         // 🚀 PAGE LOAD
         // ============================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            loadKeysFromStorage();
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load keys from database first
+            await loadKeysFromDB();
 
-            // Load config from DB first
-            loadAdminConfig().then(() => {
-                // If user has active session, restart stream with new config
-                const savedKey = localStorage.getItem('sessionKey');
-                const savedTimer = localStorage.getItem('timerRemaining');
-                const savedStartTime = localStorage.getItem('timerStartTime');
-
-                if (savedKey && savedTimer && savedStartTime) {
-                    const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
-                    const remaining = parseInt(savedTimer) - elapsed;
-
-                    if (remaining > 0) {
-                        sessionKey = savedKey;
-                        timeRemaining = remaining;
-                        verificationPage.classList.add('hidden');
-                        playerPage.classList.remove('hidden');
-                        initPlayer();
-                        setTimeout(() => {
-                            loadLiveStream();
-                            startTimer();
-                        }, 500);
-                        console.log('✅ Session restored! Time remaining:', timeRemaining);
-                        return;
-                    } else {
-                        localStorage.removeItem('timerRemaining');
-                        localStorage.removeItem('timerStartTime');
-                        localStorage.removeItem('sessionKey');
-                    }
-                }
-            });
+            // Load config from DB
+            await loadAdminConfig();
 
             // Start remote polling
             setInterval(checkRemoteStatus, REMOTE_CHECK_INTERVAL);
 
-            // 🔥 START REFRESH SIGNAL CHECK - Every 5 seconds
+            // Start refresh signal check
             setInterval(checkRefreshSignal, 5000);
+
+            // Check for saved session
+            const savedKey = localStorage.getItem('sessionKey');
+            const savedTimer = localStorage.getItem('timerRemaining');
+            const savedStartTime = localStorage.getItem('timerStartTime');
+
+            if (savedKey && savedTimer && savedStartTime) {
+                const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
+                const remaining = parseInt(savedTimer) - elapsed;
+
+                if (remaining > 0) {
+                    sessionKey = savedKey;
+                    timeRemaining = remaining;
+                    verificationPage.classList.add('hidden');
+                    playerPage.classList.remove('hidden');
+                    initPlayer();
+                    setTimeout(() => {
+                        loadLiveStream();
+                        startTimer();
+                    }, 500);
+                    console.log('✅ Session restored! Time remaining:', timeRemaining);
+                    return;
+                } else {
+                    localStorage.removeItem('timerRemaining');
+                    localStorage.removeItem('timerStartTime');
+                    localStorage.removeItem('sessionKey');
+                }
+            }
 
             console.log('✅ Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
             console.log('🔑 Total Keys:', VALID_KEYS.length);
             console.log('⏱️ Timer: 2 Hours');
             console.log('📡 Remote Control: Active');
-            console.log('🔄 Auto-refresh: Active (checks every 5 seconds)');
+            console.log('🔄 Auto-refresh: Active');
             console.log('🔒 One-time use key system is ACTIVE');
         });
 
