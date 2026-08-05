@@ -285,6 +285,46 @@
             50% { opacity: 0.3; transform: scale(0.8); }
         }
 
+        /* ================================================================
+           🔥 TIMER BAR - 2 HOURS
+           ================================================================ */
+        .timer-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            background: #12121e;
+            border-radius: 10px;
+            border: 1px solid #2a2a4e;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .timer-bar .label {
+            color: #a0a0b8;
+        }
+
+        .timer-bar .value {
+            font-weight: 700;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 28px;
+            letter-spacing: 3px;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .timer-bar .timer-icon {
+            color: #ff0044;
+            animation: pulse 1.5s infinite;
+        }
+
+        .timer-bar.warning .value {
+            color: #ff6b6b;
+            animation: blink 0.5s infinite;
+        }
+
         .player-wrapper {
             background: #000;
             border-radius: 12px;
@@ -354,7 +394,7 @@
         }
 
         /* ================================================================
-           🔥 DURATION DISPLAY - ONLY LECTURE TIME (Removed Actual Time)
+           🔥 DURATION DISPLAY - ONLY LECTURE TIME
            ================================================================ */
         .duration-bar {
             display: flex;
@@ -470,38 +510,6 @@
         }
 
         /* ================================================================
-           🔥 REMOTE CONTROL STATUS
-           ================================================================ */
-        .remote-status {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 16px;
-            background: #0f0f23;
-            border-radius: 8px;
-            border: 1px solid #2a2a4e;
-            margin-bottom: 12px;
-            font-size: 12px;
-            color: #a0a0b8;
-        }
-
-        .remote-status .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .remote-status .dot.online {
-            background: #00ff88;
-        }
-
-        .remote-status .dot.offline {
-            background: #ff6b6b;
-        }
-
-        /* ================================================================
            🔥 BLANK PAGE OVERLAY
            ================================================================ */
         #blankOverlay {
@@ -541,6 +549,38 @@
             font-size: 16px;
         }
 
+        /* ================================================================
+           🔥 REMOTE CONTROL STATUS
+           ================================================================ */
+        .remote-status {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: #0f0f23;
+            border-radius: 8px;
+            border: 1px solid #2a2a4e;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: #a0a0b8;
+        }
+
+        .remote-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .remote-status .dot.online {
+            background: #00ff88;
+        }
+
+        .remote-status .dot.offline {
+            background: #ff6b6b;
+        }
+
         @media (max-width: 768px) {
             .container { padding: 16px; }
             .controls-bar { flex-direction: column; }
@@ -551,6 +591,8 @@
             .key-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
             .key-item { font-size: 14px; padding: 8px 6px; }
             .duration-bar { flex-wrap: wrap; }
+            .timer-bar { flex-wrap: wrap; }
+            .timer-bar .value { font-size: 20px; }
             #blankOverlay .blank-title { font-size: 24px; }
         }
     </style>
@@ -610,6 +652,13 @@
                 <span id="statusTextRemote">🟢 Remote: Connected</span>
             </div>
 
+            <!-- 🔥 TIMER BAR - 2 HOURS -->
+            <div class="timer-bar" id="timerBar">
+                <span class="timer-icon">⏳</span>
+                <span class="label">⏱️ Session Time Remaining:</span>
+                <span class="value" id="timerDisplay">02:00:00</span>
+            </div>
+
             <div class="player-wrapper">
                 <video id="my-video" class="video-js vjs-big-play-centered vjs-16-9" 
                        controls preload="auto" playsinline
@@ -663,14 +712,15 @@
     <script>
         /**
          * ================================================================
-         *  🔐 SECURE LIVE STREAM - One-Time Verification Key + Remote Control
+         *  🔐 SECURE LIVE STREAM - One-Time Verification Key + 2 Hour Timer
          *  - Click on any key to copy it
          *  - User must enter valid 8-digit key
          *  - Key can be used only once (stored in localStorage)
          *  - Shows lecture duration in HH:MM:SS format (from video)
+         *  - ⏱️ 2 Hour Timer - Starts after verification
+         *  - When timer hits 00:00:00, asks for key again
          *  - ✅ Enter key works on the input field
          *  - 🔄 Remote Control: Checks localStorage for 'videoStatus'
-         *  - 🕐 Actual Time REMOVED
          * ================================================================
          */
 
@@ -683,6 +733,9 @@
 
         // Remote control API key
         const API_KEY = 'videoStatus';
+
+        // ⭐⭐⭐ TIMER DURATION - 2 HOURS (7200 seconds) ⭐⭐⭐
+        const TIMER_DURATION = 7200;
 
         // ⭐⭐⭐ 30 Random One-Time Keys ⭐⭐⭐
         const VALID_KEYS = [
@@ -711,9 +764,19 @@
         const messageEl = document.getElementById('message');
         const classNameText = document.getElementById('classNameText');
         const durationDisplay = document.getElementById('durationDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerBar = document.getElementById('timerBar');
 
         const statusDot = document.getElementById('statusDot');
         const statusTextRemote = document.getElementById('statusTextRemote');
+
+        // ============================================================
+        // ⏱️ TIMER STATE
+        // ============================================================
+        let timerInterval = null;
+        let timeRemaining = TIMER_DURATION;
+        let isTimerRunning = false;
+        let sessionKey = null;
 
         // ============================================================
         // 🏷️ SET CLASS NAME
@@ -806,6 +869,9 @@
                 usedKeys.push(enteredKey);
                 localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
 
+                sessionKey = enteredKey;
+                localStorage.setItem('sessionKey', sessionKey);
+
                 verifyMessage.textContent = '✅ Access granted! Loading stream...';
                 verifyMessage.className = 'verify-success';
 
@@ -815,6 +881,7 @@
                     initPlayer();
                     setTimeout(() => {
                         loadLiveStream();
+                        startTimer();
                         checkRemoteStatus();
                     }, 500);
                 }, 800);
@@ -843,6 +910,102 @@
         });
 
         // ============================================================
+        // ⏱️ TIMER FUNCTIONS
+        // ============================================================
+
+        function startTimer() {
+            if (isTimerRunning) return;
+            
+            const savedTimer = localStorage.getItem('timerRemaining');
+            const savedKey = localStorage.getItem('sessionKey');
+            const savedStartTime = localStorage.getItem('timerStartTime');
+            
+            if (savedTimer && savedKey && savedStartTime) {
+                const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
+                timeRemaining = Math.max(0, parseInt(savedTimer) - elapsed);
+                sessionKey = savedKey;
+                
+                if (timeRemaining <= 0) {
+                    showVerificationPage();
+                    return;
+                }
+            } else {
+                timeRemaining = TIMER_DURATION;
+                localStorage.setItem('timerStartTime', Date.now().toString());
+                localStorage.setItem('timerRemaining', timeRemaining.toString());
+                localStorage.setItem('sessionKey', sessionKey);
+            }
+
+            isTimerRunning = true;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                localStorage.setItem('timerRemaining', timeRemaining.toString());
+                updateTimerDisplay();
+                
+                // Warning when less than 5 minutes (300 seconds)
+                if (timeRemaining < 300) {
+                    timerBar.classList.add('warning');
+                } else {
+                    timerBar.classList.remove('warning');
+                }
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    isTimerRunning = false;
+                    localStorage.removeItem('timerRemaining');
+                    localStorage.removeItem('timerStartTime');
+                    localStorage.removeItem('sessionKey');
+                    showVerificationPage();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(timeRemaining / 3600);
+            const minutes = Math.floor((timeRemaining % 3600) / 60);
+            const seconds = timeRemaining % 60;
+            timerDisplay.textContent = 
+                String(hours).padStart(2, '0') + ':' + 
+                String(minutes).padStart(2, '0') + ':' + 
+                String(seconds).padStart(2, '0');
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            isTimerRunning = false;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timeRemaining = TIMER_DURATION;
+            timerBar.classList.remove('warning');
+            updateTimerDisplay();
+            localStorage.removeItem('timerRemaining');
+            localStorage.removeItem('timerStartTime');
+            localStorage.removeItem('sessionKey');
+        }
+
+        function showVerificationPage() {
+            stopTimer();
+            resetTimer();
+            playerPage.classList.add('hidden');
+            verificationPage.classList.remove('hidden');
+            if (player) {
+                player.pause();
+                player.src({ src: '', type: '' });
+            }
+            showMessage('⏱️ Session expired! Please enter a new key.', 'info');
+            keyInput.value = '';
+            keyInput.focus();
+        }
+
+        // ============================================================
         // 🔄 REMOTE CONTROL STATUS CHECK
         // ============================================================
 
@@ -850,7 +1013,6 @@
             const status = localStorage.getItem(API_KEY) || 'playing';
             
             if (status === 'paused' || status === 'blank') {
-                // Show blank overlay, pause player
                 blankOverlay.classList.add('show');
                 if (player) {
                     player.pause();
@@ -858,7 +1020,6 @@
                 statusDot.className = 'dot offline';
                 statusTextRemote.textContent = '🔴 Remote: Paused';
             } else {
-                // Hide blank overlay, play player
                 blankOverlay.classList.remove('show');
                 if (player && player.paused()) {
                     player.play().catch(() => {});
@@ -1008,16 +1169,44 @@
             // Start remote status check every 2 seconds
             setInterval(checkRemoteStatus, 2000);
             
+            // Check for saved session
+            const savedKey = localStorage.getItem('sessionKey');
+            const savedTimer = localStorage.getItem('timerRemaining');
+            const savedStartTime = localStorage.getItem('timerStartTime');
+            
+            if (savedKey && savedTimer && savedStartTime) {
+                const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
+                const remaining = parseInt(savedTimer) - elapsed;
+                
+                if (remaining > 0) {
+                    sessionKey = savedKey;
+                    timeRemaining = remaining;
+                    verificationPage.classList.add('hidden');
+                    playerPage.classList.remove('hidden');
+                    initPlayer();
+                    setTimeout(() => {
+                        loadLiveStream();
+                        startTimer();
+                    }, 500);
+                    console.log('✅ Session restored! Time remaining:', timeRemaining);
+                    return;
+                } else {
+                    localStorage.removeItem('timerRemaining');
+                    localStorage.removeItem('timerStartTime');
+                    localStorage.removeItem('sessionKey');
+                }
+            }
+
             console.log('✅ Secure Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
             console.log('🔑 Total Keys:', VALID_KEYS.length);
+            console.log('⏱️ Timer Duration: 2 Hours (7200 seconds)');
             console.log('📺 Video URL:', VIDEO_URL);
             console.log('🔒 Referer: REMOVED');
             console.log('💡 Click any key to copy');
             console.log('⏱️ Lecture Duration: HH:MM:SS (from video)');
             console.log('⌨️ Press ENTER to verify key');
             console.log('🔄 Button: LIVE REFRESH');
-            console.log('🕐 Actual Time: REMOVED');
             console.log('🔗 Remote Control: Active');
         });
 
