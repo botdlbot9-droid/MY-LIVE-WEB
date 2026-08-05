@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Live Stream - 60 Sec Timer</title>
-    <link href="https://unpkg.com/video.js@8/dist/video-js.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/video.js@8/dist/video.min.js"></script>
-    <script src="https://unpkg.com/@videojs/http-streaming@3/dist/videojs-http-streaming.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>Admin Panel - Video Control</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* ================================================================
-           CSS - Full Dark Theme (Verification + Player)
+           CSS - Admin Panel Dark Theme
            ================================================================ */
         * {
             margin: 0;
@@ -30,11 +27,11 @@
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 500px;
             width: 100%;
             background: #1a1a2e;
             border-radius: 16px;
-            padding: 25px;
+            padding: 30px;
             border: 1px solid #2a2a4e;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
         }
@@ -43,19 +40,17 @@
             display: none !important;
         }
 
-        /* ===== VERIFICATION PAGE ===== */
-        #verificationPage {
-            max-width: 500px;
-            margin: 40px auto;
+        /* ===== LOGIN PAGE ===== */
+        #loginPage {
             text-align: center;
         }
 
-        .verify-icon {
+        .lock-icon {
             font-size: 60px;
             margin-bottom: 15px;
         }
 
-        .verify-title {
+        .login-title {
             font-size: 24px;
             font-weight: 700;
             margin-bottom: 8px;
@@ -65,41 +60,35 @@
             background-clip: text;
         }
 
-        .verify-subtitle {
+        .login-subtitle {
             color: #a0a0b8;
-            font-size: 15px;
+            font-size: 14px;
             margin-bottom: 25px;
         }
 
-        .verify-input {
+        .login-input {
             width: 100%;
             padding: 14px 18px;
             border-radius: 10px;
             border: 1px solid #2a2a4e;
             background: #0f0f23;
             color: #fff;
-            font-size: 20px;
-            text-align: center;
-            letter-spacing: 6px;
-            font-weight: 700;
+            font-size: 16px;
             outline: none;
             transition: 0.3s;
             font-family: 'Segoe UI', sans-serif;
         }
 
-        .verify-input:focus {
+        .login-input:focus {
             border-color: #f7971e;
             box-shadow: 0 0 0 3px rgba(247, 151, 30, 0.15);
         }
 
-        .verify-input::placeholder {
-            letter-spacing: 0;
-            font-weight: 400;
+        .login-input::placeholder {
             color: #6a6a8a;
-            font-size: 14px;
         }
 
-        .verify-btn {
+        .login-btn {
             width: 100%;
             padding: 14px;
             margin-top: 15px;
@@ -114,380 +103,161 @@
             font-family: 'Segoe UI', sans-serif;
         }
 
-        .verify-btn:hover {
+        .login-btn:hover {
             transform: scale(1.02);
             box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
         }
 
-        .verify-error {
+        .login-error {
             color: #ff6b6b;
             font-size: 14px;
             margin-top: 12px;
             min-height: 20px;
         }
 
-        .verify-success {
-            color: #00ff88;
-            font-size: 14px;
-            margin-top: 12px;
-            min-height: 20px;
-        }
-
-        /* ================================================================
-           🔥 KEY LIST - Click to Copy
-           ================================================================ */
-        .key-list-container {
-            margin-top: 25px;
-            padding: 20px;
-            background: #12121e;
-            border-radius: 12px;
-            border: 1px solid #2a2a4e;
-        }
-
-        .key-list-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #a0a0b8;
-            margin-bottom: 15px;
+        /* ===== ADMIN PANEL ===== */
+        #adminPanel {
             text-align: center;
-            letter-spacing: 1px;
         }
 
-        .key-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
+        .admin-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
         }
 
-        .key-item {
-            background: #0f0f23;
-            border: 1px solid #2a2a4e;
-            border-radius: 8px;
-            padding: 10px 8px;
-            text-align: center;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
+        .admin-title {
+            font-size: 22px;
             font-weight: 700;
-            letter-spacing: 2px;
-            color: #f7971e;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            user-select: none;
-        }
-
-        .key-item:hover {
-            background: #1a1a3e;
-            border-color: #f7971e;
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
-        }
-
-        .key-item:active {
-            transform: scale(0.95);
-        }
-
-        .key-item.copied {
-            background: #00ff88;
-            color: #0a0a12;
-            border-color: #00ff88;
-        }
-
-        .toast-message {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #00ff88;
-            color: #0a0a12;
-            padding: 12px 28px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 15px;
-            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.3);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            z-index: 9999;
-            pointer-events: none;
-        }
-
-        .toast-message.show {
-            opacity: 1;
-        }
-
-        /* ===== PLAYER PAGE ===== */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
+            margin-bottom: 5px;
             background: linear-gradient(135deg, #f7971e, #ffd200);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .class-name {
-            background: rgba(247, 151, 30, 0.15);
-            border: 1px solid rgba(247, 151, 30, 0.3);
-            padding: 6px 18px;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #f7971e;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .class-name i {
-            font-size: 14px;
-        }
-
-        .live-badge {
-            background: #ff0044;
-            padding: 6px 18px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #fff;
-            animation: blink 1.2s infinite;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .live-badge::before {
-            content: "●";
-            font-size: 16px;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(0.8); }
-        }
-
-        /* ================================================================
-           🔥 TIMER BAR - 60 Second Countdown
-           ================================================================ */
-        .timer-bar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            padding: 12px 20px;
-            background: #12121e;
-            border-radius: 10px;
-            border: 1px solid #2a2a4e;
-            margin-bottom: 16px;
-            font-size: 14px;
-        }
-
-        .timer-bar .label {
+        .admin-subtitle {
             color: #a0a0b8;
-        }
-
-        .timer-bar .value {
-            font-weight: 700;
-            color: #00ff88;
-            font-family: 'Courier New', monospace;
-            font-size: 28px;
-            letter-spacing: 3px;
-            min-width: 60px;
-            text-align: center;
-        }
-
-        .timer-bar .timer-icon {
-            color: #ff0044;
-            animation: pulse 1.5s infinite;
-        }
-
-        .timer-bar.warning .value {
-            color: #ff6b6b;
-            animation: blink 0.5s infinite;
-        }
-
-        .player-wrapper {
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            aspect-ratio: 16 / 9;
-            width: 100%;
+            font-size: 13px;
             margin-bottom: 20px;
         }
 
-        #my-video {
-            width: 100%;
-            height: 100%;
-            display: block;
+        .status-box {
+            background: #12121e;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #2a2a4e;
+            margin-bottom: 20px;
         }
 
-        .controls-bar {
+        .status-box .label {
+            color: #a0a0b8;
+            font-size: 13px;
+        }
+
+        .status-box .value {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .status-box .value.online {
+            color: #00ff88;
+        }
+
+        .status-box .value.offline {
+            color: #ff6b6b;
+        }
+
+        .btn-group {
             display: flex;
-            flex-wrap: wrap;
             gap: 12px;
-            align-items: center;
+            flex-wrap: wrap;
             justify-content: center;
-            background: #12121e;
-            padding: 14px 18px;
-            border-radius: 10px;
-            border: 1px solid #2a2a4e;
-            margin-bottom: 16px;
         }
 
         .btn {
-            padding: 12px 36px;
+            padding: 14px 30px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 700;
             font-size: 16px;
             cursor: pointer;
             transition: 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
             font-family: 'Segoe UI', sans-serif;
+            flex: 1;
+            min-width: 120px;
         }
 
-        .btn-live {
+        .btn-pause {
             background: linear-gradient(135deg, #ff0044, #cc0033);
             color: #fff;
-            box-shadow: 0 4px 20px rgba(255, 0, 68, 0.4);
+            box-shadow: 0 4px 20px rgba(255, 0, 68, 0.3);
         }
 
-        .btn-live:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 30px rgba(255, 0, 68, 0.6);
+        .btn-pause:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(255, 0, 68, 0.5);
         }
 
-        .btn-live .pulse-ring {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            border-radius: 50%;
-            animation: pulse-ring 1.5s infinite;
+        .btn-pause:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        @keyframes pulse-ring {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        .btn-resume {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #0a0a12;
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
         }
 
-        /* ================================================================
-           🔥 DURATION DISPLAY - ONLY LECTURE TIME
-           ================================================================ */
-        .duration-bar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            background: #12121e;
-            border-radius: 10px;
+        .btn-resume:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn-resume:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-refresh {
+            background: #0f0f23;
             border: 1px solid #2a2a4e;
-            margin-bottom: 16px;
-            font-size: 14px;
-        }
-
-        .duration-bar .label {
             color: #a0a0b8;
+            padding: 14px 20px;
+            flex: 0.5;
+            min-width: 60px;
         }
 
-        .duration-bar .value {
-            font-weight: 700;
-            color: #f7971e;
-            font-family: 'Courier New', monospace;
-            font-size: 18px;
-            letter-spacing: 2px;
-            min-width: 100px;
-            text-align: center;
-        }
-
-        .duration-bar .live-icon {
-            color: #ff0044;
-            animation: pulse 1.5s infinite;
-        }
-
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding: 12px 16px;
-            background: #12121e;
-            border-radius: 10px;
-            border: 1px solid #2a2a4e;
-            margin-bottom: 16px;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-        }
-
-        .status-item .label {
-            color: #a0a0b8;
-        }
-
-        .status-item .value {
-            font-weight: 600;
-            color: #00ff88;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #00ff88;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulse 1.5s infinite;
+        .btn-refresh:hover {
+            border-color: #f7971e;
+            color: #fff;
         }
 
         .message {
-            font-size: 14px;
+            margin-top: 15px;
             padding: 10px 16px;
             border-radius: 8px;
+            font-size: 14px;
             display: none;
-            margin-bottom: 12px;
         }
 
         .message.show {
             display: block;
         }
 
-        .message.error {
-            color: #ff6b6b;
-            background: rgba(255, 0, 0, 0.08);
-            border-left: 3px solid #ff6b6b;
-        }
-
         .message.success {
             color: #00ff88;
             background: rgba(0, 255, 136, 0.08);
             border-left: 3px solid #00ff88;
+        }
+
+        .message.error {
+            color: #ff6b6b;
+            background: rgba(255, 0, 0, 0.08);
+            border-left: 3px solid #ff6b6b;
         }
 
         .message.info {
@@ -500,7 +270,7 @@
             margin-top: 20px;
             text-align: center;
             color: #6a6a8a;
-            font-size: 13px;
+            font-size: 12px;
             border-top: 1px solid #1a1a3e;
             padding-top: 18px;
         }
@@ -509,241 +279,81 @@
             color: #f7971e;
         }
 
-        /* ================================================================
-           🚫 SUSPEND MAINTENANCE PAGE
-           ================================================================ */
-        #maintenanceOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a12;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            padding: 20px;
-            text-align: center;
-        }
-
-        #maintenanceOverlay.show {
-            display: flex;
-        }
-
-        #maintenanceOverlay .maintenance-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-
-        #maintenanceOverlay .maintenance-title {
-            font-size: 32px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-        }
-
-        #maintenanceOverlay .maintenance-subtitle {
-            color: #a0a0b8;
-            font-size: 18px;
-            max-width: 500px;
-            margin-bottom: 20px;
-        }
-
-        #maintenanceOverlay .maintenance-btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            color: #0a0a12;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 5px;
-            transition: 0.3s;
-        }
-
-        #maintenanceOverlay .maintenance-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
-        }
-
-        #maintenanceOverlay .maintenance-btn-outline {
-            padding: 12px 30px;
-            border: 2px solid #2a2a4e;
-            border-radius: 10px;
-            background: transparent;
-            color: #fff;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            margin: 5px;
-            transition: 0.3s;
-        }
-
-        #maintenanceOverlay .maintenance-btn-outline:hover {
-            border-color: #f7971e;
-            color: #f7971e;
-        }
-
-        #maintenanceOverlay .maintenance-time {
+        .last-updated {
             color: #6a6a8a;
-            font-size: 13px;
-            margin-top: 30px;
+            font-size: 11px;
+            margin-top: 8px;
         }
 
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        @media (max-width: 768px) {
-            .container { padding: 16px; }
-            .controls-bar { flex-direction: column; }
-            .btn { justify-content: center; width: 100%; }
-            .status-bar { flex-direction: column; align-items: flex-start; }
-            .header { flex-direction: column; align-items: flex-start; }
-            .class-name { font-size: 12px; padding: 4px 12px; }
-            .key-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
-            .key-item { font-size: 14px; padding: 8px 6px; }
-            .duration-bar { flex-wrap: wrap; }
-            .timer-bar { flex-wrap: wrap; }
-            .timer-bar .value { font-size: 20px; }
-            .btn-group { flex-direction: column; align-items: center; }
-            #maintenanceOverlay .maintenance-title { font-size: 24px; }
-            #maintenanceOverlay .maintenance-subtitle { font-size: 16px; }
+        @media (max-width: 480px) {
+            .container { padding: 20px; }
+            .btn { min-width: 100px; padding: 12px 20px; font-size: 14px; }
+            .btn-group { flex-direction: column; }
+            .btn-refresh { flex: 1; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ========================================================== -->
-    <!-- 🚫 MAINTENANCE OVERLAY (Hidden by default) -->
-    <!-- ========================================================== -->
-    <div id="maintenanceOverlay">
-        <div class="maintenance-icon">🔧</div>
-        <div class="maintenance-title">Under Maintenance</div>
-        <div class="maintenance-subtitle">
-            The live stream is temporarily unavailable. Please check back later.
-        </div>
-        <div class="btn-group">
-            <button class="maintenance-btn" onclick="window.location.reload()">🔄 Refresh</button>
-            <button class="maintenance-btn-outline" onclick="resumeWebsite()">↩️ Resume</button>
-        </div>
-        <div class="maintenance-time" id="maintenanceTime"></div>
-    </div>
+    <div class="container">
 
-    <!-- ========================================================== -->
-    <!-- 🔐 MAIN APP -->
-    <!-- ========================================================== -->
-    <div class="container" id="appContainer">
-
-        <!-- ===== VERIFICATION PAGE ===== -->
-        <div id="verificationPage">
-            <div class="verify-icon">🔑</div>
-            <div class="verify-title">Access Code Required</div>
-            <div class="verify-subtitle">Enter your one-time access key to watch the live stream</div>
-            
-            <form id="verifyForm" onsubmit="return false;">
-                <input type="text" class="verify-input" id="keyInput" placeholder="Enter 8-digit key" maxlength="8" autofocus>
-                <button type="submit" class="verify-btn" id="verifyBtn">🔓 Unlock Stream</button>
-            </form>
-            
-            <div id="verifyMessage" class="verify-error"></div>
-
-            <div class="key-list-container">
-                <div class="key-list-title">📋 Click any key to copy</div>
-                <div class="key-grid" id="keyGrid"></div>
-            </div>
+        <!-- ===== LOGIN PAGE ===== -->
+        <div id="loginPage">
+            <div class="lock-icon">🔐</div>
+            <div class="login-title">Admin Login</div>
+            <div class="login-subtitle">Enter your credentials to control the stream</div>
+            <input type="password" class="login-input" id="passwordInput" placeholder="Enter password" autofocus>
+            <button class="login-btn" onclick="login()">🔓 Login</button>
+            <div id="loginError" class="login-error"></div>
         </div>
 
-        <!-- ===== PLAYER PAGE ===== -->
-        <div id="playerPage" class="hidden">
+        <!-- ===== ADMIN PANEL ===== -->
+        <div id="adminPanel" class="hidden">
+            <div class="admin-icon">🎬</div>
+            <div class="admin-title">Video Control</div>
+            <div class="admin-subtitle">Play or pause the live stream remotely</div>
 
-            <div class="header">
-                <div class="header-left">
-                    <h1>📺 Live Stream</h1>
-                    <span class="class-name" id="liveClassName">
-                        <i class="fas fa-chalkboard-teacher"></i> 
-                        <span id="classNameText">ClassPlus Live</span>
-                    </span>
+            <!-- Status Box -->
+            <div class="status-box">
+                <div class="label">📊 Current Status</div>
+                <div class="value" id="statusValue">
+                    <span id="statusText">Checking...</span>
                 </div>
-                <div class="live-badge">लाइव</div>
             </div>
 
-            <!-- 🔥 TIMER BAR - 60 Second Countdown -->
-            <div class="timer-bar" id="timerBar">
-                <span class="timer-icon">⏳</span>
-                <span class="label">⏱️ Session Time Remaining:</span>
-                <span class="value" id="timerDisplay">60</span>
-            </div>
-
-            <div class="player-wrapper">
-                <video id="my-video" class="video-js vjs-big-play-centered vjs-16-9" 
-                       controls preload="auto" playsinline
-                       referrerpolicy="no-referrer">
-                    <p class="vjs-no-js">Please enable JavaScript</p>
-                </video>
-            </div>
-
-            <!-- 🔥 DURATION BAR -->
-            <div class="duration-bar">
-                <span class="live-icon">●</span>
-                <span class="label">⏱️ Lecture Duration:</span>
-                <span class="value" id="durationDisplay">00:00:00</span>
-            </div>
-
-            <div class="controls-bar">
-                <button class="btn btn-live" onclick="loadLiveStream()">
-                    <span class="pulse-ring"></span> LIVE REFRESH
+            <!-- Buttons -->
+            <div class="btn-group">
+                <button class="btn btn-pause" id="pauseBtn" onclick="pauseVideo()">
+                    ⏸️ Pause Video
+                </button>
+                <button class="btn btn-resume" id="resumeBtn" onclick="resumeVideo()">
+                    ▶️ Play Video
+                </button>
+                <button class="btn btn-refresh" onclick="fetchStatus()" title="Refresh Status">
+                    🔄
                 </button>
             </div>
 
-            <div class="status-bar">
-                <div class="status-item">
-                    <span class="status-dot"></span>
-                    <span class="label">स्थिति:</span>
-                    <span class="value" id="statusText">तैयार</span>
-                </div>
-                <div class="status-item">
-                    <span class="label"><i class="fas fa-microchip"></i> प्लेयर:</span>
-                    <span class="value" id="playerInfo">Video.js</span>
-                </div>
+            <!-- Message -->
+            <div id="adminMessage" class="message"></div>
+
+            <!-- Last Updated -->
+            <div class="last-updated" id="lastUpdated">Last updated: --</div>
+
+            <div class="footer">
+                ⚡ <span class="highlight">Remote Control</span> — API Based
             </div>
-
-            <div id="message" class="message"></div>
-
-            <footer class="footer">
-                <p>⚡ <span class="highlight">Secure Stream</span> — One-Time Access (60 Sec)</p>
-            </footer>
         </div>
 
     </div>
 
-    <!-- ============================================================ -->
-    <!-- TOAST MESSAGE -->
-    <!-- ============================================================ -->
-    <div id="toastMessage" class="toast-message">✅ Copied!</div>
-
-    <!-- ============================================================ -->
-    <!-- JAVASCRIPT -->
-    <!-- ============================================================ -->
     <script>
         /**
          * ================================================================
-         *  🔐 SECURE LIVE STREAM - One-Time Verification Key
-         *  - Click on any key to copy it
-         *  - User must enter valid 8-digit key
-         *  - Key can be used only once (stored in localStorage)
-         *  - Shows lecture duration in HH:MM:SS format (from video)
-         *  - ⏱️ 60 Second Timer - Starts after verification
-         *  - When timer hits 00, asks for key again
-         *  - ✅ Enter key works on the input field
+         *  🎬 ADMIN PANEL - API Based Video Control
+         *  - Password protected login
+         *  - Uses localStorage API to communicate with website
+         *  - Play/Pause video remotely
          * ================================================================
          */
 
@@ -751,515 +361,157 @@
         // 🔑 CONFIGURATION
         // ============================================================
 
-        const CLASS_NAME = "ClassPlus Live";
-        const VIDEO_URL = "https://vs.classplusapp.com/hls/6a718806e15274f80f0ea83c/720p20.m3u8";
+        // ⭐⭐⭐ CHANGE THIS PASSWORD ⭐⭐⭐
+        const ADMIN_PASSWORD = "admin123";
 
-        // ⭐⭐⭐ 60 SECOND TIMER ⭐⭐⭐
-        const TIMER_DURATION = 60;
-
-        // ⭐⭐⭐ 40 Random One-Time Keys ⭐⭐⭐
-        const VALID_KEYS = [
-            'K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
-            'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4',
-            'D7A4F2G9', 'M8P3N6C2', 'V5B9T1E7', 'S4W7R8K2', 'J3H6L9N1',
-            'P8Q2M5T7', 'C6V9B4N2', 'F3R8K7W5', 'L9N2M6P4', 'G5T1E8S7',
-            'B7R4M9K2', 'X8W5P3N1', 'Q2T6V9C4', 'H5J8F3L7', 'Z6M2N9P4',
-            'R8W3Q7T5', 'Y4U9I2O7', 'F9G7H3J5', 'P5N6M8C2', 'T7R4W9Q3',
-            'M2N6P8C5', 'K9H7R2M4', 'V4B8N2C6', 'S7W3R9K5', 'J6H4L8N2',
-            'P2Q7M5T9', 'C8V4B9N3', 'F5R2K8W7', 'G9T3E7S5'
-        ];
-
-        // ============================================================
-        // 🚫 RENDER SUSPEND DETECTION
-        // ============================================================
-
-        const IS_SUSPENDED = false;
-        const urlParams = new URLSearchParams(window.location.search);
-        const suspendParam = urlParams.get('suspend');
-        const SUSPENDED = suspendParam !== null ? suspendParam === 'true' : IS_SUSPENDED;
+        // API endpoint (localStorage is used as API)
+        const API_KEY = 'videoStatus';
 
         // ============================================================
         // 📦 DOM REFS
         // ============================================================
-        const appContainer = document.getElementById('appContainer');
-        const verificationPage = document.getElementById('verificationPage');
-        const playerPage = document.getElementById('playerPage');
-        const maintenanceOverlay = document.getElementById('maintenanceOverlay');
-        const maintenanceTime = document.getElementById('maintenanceTime');
-
-        const keyInput = document.getElementById('keyInput');
-        const verifyMessage = document.getElementById('verifyMessage');
-        const keyGrid = document.getElementById('keyGrid');
-        const toast = document.getElementById('toastMessage');
-        const verifyForm = document.getElementById('verifyForm');
+        const loginPage = document.getElementById('loginPage');
+        const adminPanel = document.getElementById('adminPanel');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginError = document.getElementById('loginError');
 
         const statusText = document.getElementById('statusText');
-        const playerInfo = document.getElementById('playerInfo');
-        const messageEl = document.getElementById('message');
-        const classNameText = document.getElementById('classNameText');
-        const durationDisplay = document.getElementById('durationDisplay');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const timerBar = document.getElementById('timerBar');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const adminMessage = document.getElementById('adminMessage');
+        const lastUpdated = document.getElementById('lastUpdated');
 
         // ============================================================
-        // ⏱️ TIMER STATE
-        // ============================================================
-        let timerInterval = null;
-        let timeRemaining = TIMER_DURATION;
-        let isTimerRunning = false;
-        let sessionKey = null;
-
-        // ============================================================
-        // 🏷️ SET CLASS NAME
-        // ============================================================
-        classNameText.textContent = CLASS_NAME;
-
-        // ============================================================
-        // ⏱️ TIMER FUNCTIONS
+        // 🔐 LOGIN
         // ============================================================
 
-        function startTimer() {
-            if (isTimerRunning) return;
-            
-            // Check if there's a saved timer state
-            const savedTimer = localStorage.getItem('timerRemaining');
-            const savedKey = localStorage.getItem('sessionKey');
-            const savedStartTime = localStorage.getItem('timerStartTime');
-            
-            if (savedTimer && savedKey && savedStartTime) {
-                // Calculate elapsed time
-                const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
-                timeRemaining = Math.max(0, parseInt(savedTimer) - elapsed);
-                sessionKey = savedKey;
-                
-                if (timeRemaining <= 0) {
-                    // Timer expired - show verification again
-                    showVerificationPage();
-                    return;
-                }
+        function login() {
+            const password = passwordInput.value.trim();
+
+            if (password === ADMIN_PASSWORD) {
+                loginPage.classList.add('hidden');
+                adminPanel.classList.remove('hidden');
+                loginError.textContent = '';
+                fetchStatus();
+                // Auto refresh every 3 seconds
+                setInterval(fetchStatus, 3000);
             } else {
-                // Start fresh timer
-                timeRemaining = TIMER_DURATION;
-                localStorage.setItem('timerStartTime', Date.now().toString());
-                localStorage.setItem('timerRemaining', timeRemaining.toString());
-                localStorage.setItem('sessionKey', sessionKey);
-            }
-
-            isTimerRunning = true;
-            updateTimerDisplay();
-            
-            timerInterval = setInterval(() => {
-                timeRemaining--;
-                localStorage.setItem('timerRemaining', timeRemaining.toString());
-                updateTimerDisplay();
-                
-                // Warning when less than 10 seconds
-                if (timeRemaining < 10) {
-                    timerBar.classList.add('warning');
-                } else {
-                    timerBar.classList.remove('warning');
-                }
-                
-                // Timer expired
-                if (timeRemaining <= 0) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                    isTimerRunning = false;
-                    localStorage.removeItem('timerRemaining');
-                    localStorage.removeItem('timerStartTime');
-                    localStorage.removeItem('sessionKey');
-                    showVerificationPage();
-                }
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            timerDisplay.textContent = timeRemaining;
-        }
-
-        function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-            isTimerRunning = false;
-        }
-
-        function resetTimer() {
-            stopTimer();
-            timeRemaining = TIMER_DURATION;
-            timerBar.classList.remove('warning');
-            updateTimerDisplay();
-            localStorage.removeItem('timerRemaining');
-            localStorage.removeItem('timerStartTime');
-            localStorage.removeItem('sessionKey');
-        }
-
-        function showVerificationPage() {
-            stopTimer();
-            resetTimer();
-            // Hide player, show verification
-            playerPage.classList.add('hidden');
-            verificationPage.classList.remove('hidden');
-            // Reset video
-            if (player) {
-                player.pause();
-                player.src({ src: '', type: '' });
-            }
-            showMessage('⏱️ Session expired! Please enter a new key.', 'info');
-            keyInput.value = '';
-            keyInput.focus();
-        }
-
-        // ============================================================
-        // 🚫 SUSPEND FUNCTIONS
-        // ============================================================
-
-        function showMaintenancePage() {
-            maintenanceOverlay.classList.add('show');
-            if (window._maintenanceInterval) {
-                clearInterval(window._maintenanceInterval);
-            }
-            window._maintenanceInterval = setInterval(() => {
-                maintenanceTime.textContent = '⏰ ' + new Date().toLocaleString();
-            }, 1000);
-            console.log('🚫 Website is SUSPENDED.');
-        }
-
-        function resumeWebsite() {
-            const url = new URL(window.location.href);
-            url.searchParams.delete('suspend');
-            window.location.href = url.toString();
-        }
-
-        // ============================================================
-        // 🔑 RENDER KEYS
-        // ============================================================
-        function renderKeys() {
-            keyGrid.innerHTML = '';
-            VALID_KEYS.forEach(key => {
-                const el = document.createElement('div');
-                el.className = 'key-item';
-                el.textContent = key;
-                el.title = 'Click to copy';
-                el.addEventListener('click', function() {
-                    copyKey(key, el);
-                });
-                keyGrid.appendChild(el);
-            });
-        }
-
-        // ============================================================
-        // 📋 COPY KEY FUNCTION
-        // ============================================================
-        function copyKey(key, element) {
-            navigator.clipboard.writeText(key).then(() => {
-                element.classList.add('copied');
-                setTimeout(() => {
-                    element.classList.remove('copied');
-                }, 800);
-                showToast(`✅ Copied: ${key}`);
-            }).catch(() => {
-                const textArea = document.createElement('textarea');
-                textArea.value = key;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                element.classList.add('copied');
-                setTimeout(() => {
-                    element.classList.remove('copied');
-                }, 800);
-                showToast(`✅ Copied: ${key}`);
-            });
-        }
-
-        // ============================================================
-        // 🔔 TOAST NOTIFICATION
-        // ============================================================
-        let toastTimer = null;
-
-        function showToast(message) {
-            toast.textContent = message;
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
-        }
-
-        // ============================================================
-        // 🔐 VERIFICATION LOGIC
-        // ============================================================
-
-        function verifyKey() {
-            const enteredKey = keyInput.value.trim();
-
-            if (!enteredKey) {
-                verifyMessage.textContent = '❌ Please enter an access key!';
-                verifyMessage.className = 'verify-error';
-                return;
-            }
-
-            if (enteredKey.length !== 8) {
-                verifyMessage.textContent = '❌ Key must be exactly 8 characters!';
-                verifyMessage.className = 'verify-error';
-                return;
-            }
-
-            const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
-            if (usedKeys.includes(enteredKey)) {
-                verifyMessage.textContent = '❌ This key has already been used!';
-                verifyMessage.className = 'verify-error';
-                return;
-            }
-
-            if (VALID_KEYS.includes(enteredKey)) {
-                // Mark key as used
-                usedKeys.push(enteredKey);
-                localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
-
-                // Store session key
-                sessionKey = enteredKey;
-                localStorage.setItem('sessionKey', sessionKey);
-
-                verifyMessage.textContent = '✅ Access granted! Loading stream...';
-                verifyMessage.className = 'verify-success';
-
-                // Hide verification, show player
-                setTimeout(() => {
-                    verificationPage.classList.add('hidden');
-                    playerPage.classList.remove('hidden');
-                    initPlayer();
-                    setTimeout(() => {
-                        loadLiveStream();
-                        // Start timer after stream loads
-                        startTimer();
-                    }, 500);
-                }, 800);
-
-            } else {
-                verifyMessage.textContent = '❌ Invalid access key! Please try again.';
-                verifyMessage.className = 'verify-error';
-                keyInput.value = '';
-                keyInput.focus();
+                loginError.textContent = '❌ Invalid password! Please try again.';
+                passwordInput.value = '';
+                passwordInput.focus();
             }
         }
 
-        // ============================================================
-        // ⌨️ Enter Key Support
-        // ============================================================
-        verifyForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            verifyKey();
-        });
-
-        keyInput.addEventListener('keypress', function(e) {
+        // Enter key support for login
+        passwordInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                e.preventDefault();
-                verifyKey();
+                login();
             }
         });
 
         // ============================================================
-        // 🎬 VIDEO.JS PLAYER
+        // 📊 FETCH CURRENT STATUS (API Call)
         // ============================================================
-        let player = null;
 
-        function initPlayer() {
-            if (player) {
-                player.dispose();
-                player = null;
+        function fetchStatus() {
+            // API call to get current status
+            const status = localStorage.getItem(API_KEY) || 'playing';
+            updateUI(status);
+        }
+
+        function updateUI(status) {
+            if (status === 'playing') {
+                statusText.textContent = '▶️ Playing';
+                statusText.className = 'value online';
+                pauseBtn.disabled = false;
+                resumeBtn.disabled = true;
+            } else if (status === 'paused') {
+                statusText.textContent = '⏸️ Paused';
+                statusText.className = 'value offline';
+                pauseBtn.disabled = true;
+                resumeBtn.disabled = false;
+            } else {
+                statusText.textContent = '⚠️ Unknown';
+                statusText.className = 'value';
+                pauseBtn.disabled = true;
+                resumeBtn.disabled = true;
             }
 
-            player = videojs('my-video', {
-                controls: true,
-                autoplay: false,
-                preload: 'auto',
-                fluid: true,
-                html5: {
-                    hls: {
-                        enableWorker: true,
-                        lowLatencyMode: true,
-                        maxBufferLength: 30,
-                        xhrSetup: function(xhr, url) {
-                            xhr.setRequestHeader('Referer', '');
-                            try {
-                                delete xhr._headers['Referer'];
-                            } catch(e) {}
-                            console.log('🔒 Referer removed for:', url);
-                        }
-                    }
-                }
-            });
+            // Update last updated
+            const now = new Date();
+            lastUpdated.textContent = 'Last updated: ' + now.toLocaleTimeString();
 
-            player.ready(function() {
-                console.log('✅ Player Ready');
-                statusText.textContent = '✅ तैयार';
-                playerInfo.textContent = 'Video.js + hls.js';
-                showMessage('✅ प्लेयर तैयार है', 'success');
-            });
-
-            player.on('error', function() {
-                const error = player.error();
-                console.error('❌ Player Error:', error);
-                showMessage(`❌ ${error.message || 'Unknown error'}`, 'error');
-                statusText.textContent = '❌ एरर';
-            });
-
-            player.on('waiting', function() {
-                statusText.textContent = '⏳ बफर...';
-                showMessage('⏳ बफर हो रहा है...', 'info');
-            });
-
-            player.on('playing', function() {
-                statusText.textContent = '✅ चल रहा है';
-                hideMessage();
-            });
-
-            // ============================================================
-            // 🔥 LECTURE DURATION - Video Current Time (HH:MM:SS)
-            // ============================================================
-            player.on('timeupdate', function() {
-                const currentTime = player.currentTime();
-                if (currentTime && !isNaN(currentTime) && currentTime > 0) {
-                    const hours = Math.floor(currentTime / 3600);
-                    const minutes = Math.floor((currentTime % 3600) / 60);
-                    const seconds = Math.floor(currentTime % 60);
-                    
-                    durationDisplay.textContent = 
-                        String(hours).padStart(2, '0') + ':' + 
-                        String(minutes).padStart(2, '0') + ':' + 
-                        String(seconds).padStart(2, '0');
-                }
-            });
-
-            player.on('ended', function() {
-                durationDisplay.textContent = '00:00:00';
-            });
-
-            player.on('loadstart', function() {
-                durationDisplay.textContent = '00:00:00';
-            });
-
-            return player;
+            // Clear any old message
+            hideAdminMessage();
         }
 
         // ============================================================
-        // 🎬 LOAD LIVE STREAM
+        // ⏸️ PAUSE VIDEO (API Call)
         // ============================================================
-        function loadLiveStream() {
-            showMessage('⏳ लाइव स्ट्रीम लोड हो रहा है...', 'info');
-            statusText.textContent = '⏳ लोड हो रहा है...';
-            durationDisplay.textContent = '00:00:00';
 
-            if (!player) {
-                player = initPlayer();
-            }
+        function pauseVideo() {
+            if (pauseBtn.disabled) return;
+
+            pauseBtn.disabled = true;
+            pauseBtn.textContent = '⏳ Processing...';
+            showAdminMessage('⏳ Pausing video...', 'info');
 
             try {
-                player.src({
-                    src: VIDEO_URL,
-                    type: 'application/x-mpegURL'
-                });
-                player.play().catch(() => {
-                    showMessage('⚠️ ऑटोप्ले ब्लॉक, प्ले बटन दबाएँ', 'info');
-                });
-                showMessage('✅ लाइव स्ट्रीम शुरू!', 'success');
+                // API call to set status to paused
+                localStorage.setItem(API_KEY, 'paused');
+                showAdminMessage('✅ Video paused! Website will show blank page.', 'success');
+                setTimeout(fetchStatus, 500);
             } catch (error) {
-                console.error('❌ Load error:', error);
-                showMessage('❌ ' + error.message, 'error');
+                console.error('❌ Pause error:', error);
+                showAdminMessage('❌ Failed to pause: ' + error.message, 'error');
+                pauseBtn.disabled = false;
+                pauseBtn.textContent = '⏸️ Pause Video';
+            }
+        }
+
+        // ============================================================
+        // ▶️ RESUME VIDEO (API Call)
+        // ============================================================
+
+        function resumeVideo() {
+            if (resumeBtn.disabled) return;
+
+            resumeBtn.disabled = true;
+            resumeBtn.textContent = '⏳ Processing...';
+            showAdminMessage('⏳ Resuming video...', 'info');
+
+            try {
+                // API call to set status to playing
+                localStorage.setItem(API_KEY, 'playing');
+                showAdminMessage('✅ Video resumed! Website will show live stream.', 'success');
+                setTimeout(fetchStatus, 500);
+            } catch (error) {
+                console.error('❌ Resume error:', error);
+                showAdminMessage('❌ Failed to resume: ' + error.message, 'error');
+                resumeBtn.disabled = false;
+                resumeBtn.textContent = '▶️ Play Video';
             }
         }
 
         // ============================================================
         // 📢 MESSAGE HELPER
         // ============================================================
-        function showMessage(msg, type) {
-            messageEl.textContent = msg;
-            messageEl.className = 'message show ' + (type || 'info');
-            if (type === 'success' || type === 'info') {
-                clearTimeout(messageEl._hideTimer);
-                messageEl._hideTimer = setTimeout(() => {
-                    messageEl.classList.remove('show');
-                }, 5000);
-            }
+
+        function showAdminMessage(msg, type) {
+            adminMessage.textContent = msg;
+            adminMessage.className = 'message show ' + type;
         }
 
-        function hideMessage() {
-            messageEl.classList.remove('show');
-            clearTimeout(messageEl._hideTimer);
+        function hideAdminMessage() {
+            adminMessage.className = 'message';
+            adminMessage.textContent = '';
         }
 
-        // ============================================================
-        // 🚀 PAGE LOAD - Check if suspended
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            classNameText.textContent = CLASS_NAME;
-
-            if (SUSPENDED) {
-                showMaintenancePage();
-                return;
-            }
-
-            renderKeys();
-            
-            // Check if there's an active session
-            const savedKey = localStorage.getItem('sessionKey');
-            const savedTimer = localStorage.getItem('timerRemaining');
-            const savedStartTime = localStorage.getItem('timerStartTime');
-            
-            if (savedKey && savedTimer && savedStartTime) {
-                const elapsed = Math.floor((Date.now() - parseInt(savedStartTime)) / 1000);
-                const remaining = parseInt(savedTimer) - elapsed;
-                
-                if (remaining > 0) {
-                    // Session is still valid
-                    sessionKey = savedKey;
-                    timeRemaining = remaining;
-                    verificationPage.classList.add('hidden');
-                    playerPage.classList.remove('hidden');
-                    initPlayer();
-                    setTimeout(() => {
-                        loadLiveStream();
-                        startTimer();
-                    }, 500);
-                    console.log('✅ Session restored! Time remaining:', timeRemaining);
-                    return;
-                } else {
-                    // Session expired
-                    localStorage.removeItem('timerRemaining');
-                    localStorage.removeItem('timerStartTime');
-                    localStorage.removeItem('sessionKey');
-                }
-            }
-
-            console.log('✅ Secure Live Stream initialized!');
-            console.log('📚 Class Name:', CLASS_NAME);
-            console.log('🔑 Total Keys:', VALID_KEYS.length);
-            console.log('⏱️ Timer Duration: 60 Seconds');
-            console.log('💡 Click any key to copy');
-            console.log('⌨️ Press ENTER to verify key');
-        });
-
-        // ============================================================
-        // 🔄 AUTO-RETRY - Stalled Recovery
-        // ============================================================
-        setInterval(function() {
-            if (!player) return;
-            if (!player.paused() && player.readyState < 3) {
-                try {
-                    const tech = player.tech({ IWillNotUseThisInPlugins: true });
-                    if (tech && tech.vhs && tech.vhs.buffer && tech.vhs.buffer.length === 0) {
-                        console.log('🔄 Buffer empty, reloading...');
-                        player.src({ src: VIDEO_URL, type: 'application/x-mpegURL' });
-                        player.play().catch(() => {});
-                    }
-                } catch (e) {
-                    // Ignore
-                }
-            }
-        }, 5000);
+        console.log('✅ Admin Panel loaded!');
+        console.log('🔑 Password:', ADMIN_PASSWORD);
+        console.log('💡 Use "Pause" to show blank page on website');
+        console.log('💡 Use "Play" to show video on website');
+        console.log('📡 API Key:', API_KEY);
     </script>
 
 </body>
