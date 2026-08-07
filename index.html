@@ -466,7 +466,46 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* ===== BLANK OVERLAY - White Page with "Not Found" ===== */
+        /* ===== PAUSE OVERLAY - Dark (Pehle wala, same) ===== */
+        #pauseOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a12;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #pauseOverlay.show {
+            display: flex;
+        }
+
+        #pauseOverlay .pause-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        #pauseOverlay .pause-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #6a6a8a;
+            margin-bottom: 10px;
+        }
+
+        #pauseOverlay .pause-subtitle {
+            color: #3a3a4e;
+            font-size: 16px;
+        }
+
+        /* ===== BLANK OVERLAY - White with "Not Found" (SIRF YAHAN CHANGE) ===== */
         #blankOverlay {
             position: fixed;
             top: 0;
@@ -591,6 +630,7 @@
             .controls-bar { flex-direction: column; }
             .status-bar { flex-direction: column; align-items: flex-start; }
             .verify-title { font-size: 24px; }
+            #pauseOverlay .pause-title { font-size: 24px; }
             #blankOverlay .blank-title { font-size: 24px; }
             .contact-admin { flex-direction: column; align-items: center; }
             .contact-btn { width: 100%; justify-content: center; }
@@ -599,7 +639,14 @@
 </head>
 <body>
 
-    <!-- ===== BLANK OVERLAY ===== -->
+    <!-- ===== PAUSE OVERLAY - Dark (Pehle wala) ===== -->
+    <div id="pauseOverlay">
+        <div class="pause-icon">⏸️</div>
+        <div class="pause-title">Stream is Paused</div>
+        <div class="pause-subtitle">The live stream has been paused by the admin</div>
+    </div>
+
+    <!-- ===== BLANK OVERLAY - White with "Not Found" (SIRF YAHAN CHANGE) ===== -->
     <div id="blankOverlay">
         <div class="blank-icon">📄</div>
         <div class="blank-title">Not Found</div>
@@ -887,6 +934,7 @@
         // ============================================================
         const verificationPage = document.getElementById('verificationPage');
         const playerPage = document.getElementById('playerPage');
+        const pauseOverlay = document.getElementById('pauseOverlay');
         const blankOverlay = document.getElementById('blankOverlay');
         const keyInput = document.getElementById('keyInput');
         const verifyMessage = document.getElementById('verifyMessage');
@@ -1106,9 +1154,8 @@
         });
 
         // ============================================================
-        // 🔄 REMOTE CONTROL
+        // 🔄 REMOTE CONTROL - Pause vs Blank (Two Overlays)
         // ============================================================
-
         async function checkRemoteStatus() {
             try {
                 const response = await fetch(`${WORKER_URL}/status`);
@@ -1116,12 +1163,23 @@
                 const data = await response.json();
                 const status = data.value || 'playing';
 
-                if (status === 'paused' || status === 'blank') {
-                    blankOverlay.classList.add('show');
+                if (status === 'paused') {
+                    // ✅ Pause - Dark Overlay (Pehle wala)
+                    pauseOverlay.classList.add('show');
+                    blankOverlay.classList.remove('show');
                     if (player) player.pause();
                     statusDot.className = 'dot offline';
                     statusTextRemote.textContent = '🔴 Paused by Admin';
+                } else if (status === 'blank') {
+                    // ✅ Blank - White "Not Found"
+                    pauseOverlay.classList.remove('show');
+                    blankOverlay.classList.add('show');
+                    if (player) player.pause();
+                    statusDot.className = 'dot offline';
+                    statusTextRemote.textContent = '🔴 Blank Page by Admin';
                 } else {
+                    // ✅ Playing
+                    pauseOverlay.classList.remove('show');
                     blankOverlay.classList.remove('show');
                     if (player && player.paused() && !player.ended()) {
                         player.play().catch(() => {});
@@ -1359,22 +1417,10 @@
         }
 
         // ============================================================
-        // 🚀 PAGE LOAD
+        // 🚀 PAGE LOAD - Refresh par Direct Player Page (NEW FIX)
         // ============================================================
         document.addEventListener('DOMContentLoaded', async function() {
-            // Load keys from database first
-            await loadKeysFromDB();
-
-            // Load config from DB
-            await loadAdminConfig();
-
-            // Start remote polling
-            setInterval(checkRemoteStatus, REMOTE_CHECK_INTERVAL);
-
-            // Start refresh signal check
-            setInterval(checkRefreshSignal, 5000);
-
-            // Check for saved session
+            // ✅ Pehle Session Check karein
             const savedKey = localStorage.getItem('sessionKey');
             const savedTimer = localStorage.getItem('timerRemaining');
             const savedStartTime = localStorage.getItem('timerStartTime');
@@ -1384,23 +1430,43 @@
                 const remaining = parseInt(savedTimer) - elapsed;
 
                 if (remaining > 0) {
+                    // ✅ Session Active Hai - Direct Player Page
                     sessionKey = savedKey;
                     timeRemaining = remaining;
+                    
+                    // Load Keys and Config
+                    await loadKeysFromDB();
+                    await loadAdminConfig();
+                    
+                    // Hide Verification, Show Player
                     verificationPage.classList.add('hidden');
                     playerPage.classList.remove('hidden');
+                    
+                    // Init Player
                     initPlayer();
                     setTimeout(() => {
                         loadLiveStream();
                         startTimer();
+                        checkRemoteStatus();
                     }, 500);
+                    
                     console.log('✅ Session restored! Time remaining:', timeRemaining);
-                    return;
+                    return; // ✅ Yahan return karein, verification page nahi dikhega
                 } else {
+                    // Session Expired - Cleanup
                     localStorage.removeItem('timerRemaining');
                     localStorage.removeItem('timerStartTime');
                     localStorage.removeItem('sessionKey');
                 }
             }
+
+            // ❌ Agar Session Nahi Hai - Verification Page
+            await loadKeysFromDB();
+            await loadAdminConfig();
+
+            // Start remote polling
+            setInterval(checkRemoteStatus, REMOTE_CHECK_INTERVAL);
+            setInterval(checkRefreshSignal, 5000);
 
             console.log('✅ Live Stream initialized!');
             console.log('📚 Class Name:', CLASS_NAME);
@@ -1409,7 +1475,6 @@
             console.log('📡 Remote Control: Active');
             console.log('🔄 Auto-refresh: Active');
             console.log('🔒 One-time use key system is ACTIVE (Database-driven)');
-            console.log('📱 Contact Admin buttons added on both pages');
             console.log('🛡️ Anti-Developer Tools: INSTANT MODE (0.1s) ACTIVE');
             console.log('🟢 RIGHT CLICK: ALLOWED');
             console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
