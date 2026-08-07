@@ -722,9 +722,9 @@
     <script>
         /**
          * ================================================================
-         *  🛡️ ANTI-DEVELOPER TOOLS - ULTIMATE FIX
-         *  - NO debugger statement (causes "Paused in debugger")
-         *  - Uses multiple detection methods without freezing
+         *  🛡️ ANTI-DEVELOPER TOOLS - RIGHT CLICK ALLOWED
+         *  - RIGHT CLICK: ALLOWED (user preshan nahi hoga)
+         *  - F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED
          *  - Network tab clear
          *  - Console clear
          *  - Instant redirect on detection
@@ -747,21 +747,9 @@
                         performance.clearMarks();
                         performance.clearMeasures();
                     }
-                    // Clear navigation entries
-                    if (window.performance && performance.getEntries) {
-                        const entries = performance.getEntries();
-                        for (let i = 0; i < entries.length; i++) {
-                            try {
-                                // Can't delete entries, but we can clear
-                            } catch(e) {}
-                        }
-                    }
                 } catch(e) {
                     // Ignore
                 }
-                
-                // Clear all cookies (optional - uncomment if needed)
-                // document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
                 
                 // 🚀 GOOGLE.COM PAR REDIRECT
                 window.location.href = 'https://www.google.com';
@@ -808,21 +796,15 @@
             });
 
             // ============================================================
-            // 3. RIGHT CLICK DISABLE
+            // 3. 🟢 RIGHT CLICK: ALLOWED (User preshan nahi hoga)
             // ============================================================
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                blockAndRedirect();
-                return false;
-            });
+            // 🔥 FIX: Right click ko ALLOW kiya gaya hai
+            // User right click kar sakta hai, koi redirect nahi hoga
+            // document.addEventListener('contextmenu', function(e) { ... }) HATAYA
 
             // ============================================================
-            // 4. 🚫 NO DEBUGGER STATEMENT - Use Size Detection Instead
+            // 4. 🚫 NO DEBUGGER STATEMENT - Use Size Detection
             // ============================================================
-            // 🔥 CRITICAL FIX: debugger statement ko HATA DIYA
-            // Kyunki ye "Paused in debugger" ka karan hai
-            
-            let devToolsOpen = false;
             let detectionCount = 0;
             
             function detectDevTools() {
@@ -830,45 +812,22 @@
                 const widthDiff = window.outerWidth - window.innerWidth;
                 const heightDiff = window.outerHeight - window.innerHeight;
                 
-                // Method 2: Check for dev tools using element getter (without debugger)
-                try {
-                    // Create a dummy element with a getter
-                    const element = document.createElement('div');
-                    Object.defineProperty(element, 'id', {
-                        get: function() {
-                            // This triggers when dev tools inspect element
-                            devToolsOpen = true;
-                        }
-                    });
-                    console.log('%c', element);
-                } catch(e) {
-                    // Ignore
-                }
-                
-                // Method 3: Check Firebug
-                if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) {
-                    devToolsOpen = true;
-                }
-                
-                // Method 4: Check console.log timing
+                // Method 2: console.log timing
                 const start = performance.now();
                 console.log('%c', {});
                 const end = performance.now();
                 
-                // If console.log takes more than 10ms, dev tools might be open
-                if (end - start > 10) {
-                    devToolsOpen = true;
+                // Method 3: Check Firebug
+                if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) {
+                    detectionCount++;
+                    if (detectionCount >= 2) {
+                        blockAndRedirect();
+                    }
+                    return;
                 }
                 
-                // Method 5: Check if dev tools is open via element
-                try {
-                    const test = document.createElement('div');
-                    test.innerHTML = '<!--[if IE]><script>debugger;</script><![endif]-->';
-                    // Not using debugger
-                } catch(e) {}
-                
                 // Check if dev tools detected
-                if (devToolsOpen || widthDiff > 100 || heightDiff > 100) {
+                if (widthDiff > 100 || heightDiff > 100 || (end - start > 10)) {
                     detectionCount++;
                     if (detectionCount >= 2) {
                         blockAndRedirect();
@@ -914,8 +873,9 @@
             setInterval(detectDevTools, 1000);
 
             console.log('✅ Website secured with Anti-Dev Tools protection!');
+            console.log('🟢 RIGHT CLICK: ALLOWED (user friendly)');
+            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED');
             console.log('🚫 Developer tools will redirect to Google.com instantly!');
-            console.log('🔧 "Paused in debugger" issue FIXED!');
             console.log('📡 Network tab will be cleared automatically!');
         })();
 
@@ -1451,9 +1411,9 @@
             console.log('🔒 One-time use key system is ACTIVE');
             console.log('📱 Contact Admin buttons added on both pages');
             console.log('🛡️ Anti-Developer Tools: ACTIVE');
+            console.log('🟢 RIGHT CLICK: ALLOWED');
+            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED');
             console.log('🚫 Developer tools will redirect to Google.com instantly!');
-            console.log('🔧 "Paused in debugger" issue FIXED!');
-            console.log('📡 Network tab will be cleared automatically!');
         });
 
         // ============================================================
