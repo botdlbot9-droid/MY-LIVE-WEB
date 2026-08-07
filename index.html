@@ -670,7 +670,7 @@
             <!-- Duration Bar -->
             <div class="duration-bar">
                 <span class="live-icon">●</span>
-                <span class="label">⏱️ Lecture Completed:</span>
+                <span class="label">⏱️ Lecture Duration:</span>
                 <span class="value" id="durationDisplay">00:00:00</span>
             </div>
 
@@ -722,129 +722,123 @@
     <script>
         /**
          * ================================================================
-         *  🛡️ ANTI-DEVELOPER TOOLS - RIGHT CLICK ALLOWED
-         *  - RIGHT CLICK: ALLOWED (user preshan nahi hoga)
-         *  - F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED
-         *  - Network tab clear
-         *  - Console clear
-         *  - Instant redirect on detection
+         *  🛡️ ANTI-DEVELOPER TOOLS - INSTANT REDIRECT (0.1s) - Mobile Friendly
+         *  - Mobile users: SAFE, no redirects
+         *  - Desktop: F12, Ctrl+Shift+I, Ctrl+Shift+J → INSTANT REDIRECT (0.1s)
+         *  - Network tab cleared every 100ms
+         *  - RIGHT CLICK: ALLOWED
          * ================================================================
          */
         (function antiDevTools() {
-            // ============================================================
-            // 1. INSTANT BLOCK + GOOGLE REDIRECT
-            // ============================================================
-            function blockAndRedirect() {
-                // Console clear
-                console.clear();
-                
-                // Network history clear
-                try {
-                    if (window.performance && performance.clearResourceTimings) {
-                        performance.clearResourceTimings();
-                    }
-                    if (window.performance && performance.clearMarks) {
-                        performance.clearMarks();
-                        performance.clearMeasures();
-                    }
-                } catch(e) {
-                    // Ignore
-                }
-                
-                // 🚀 GOOGLE.COM PAR REDIRECT
-                window.location.href = 'https://www.google.com';
-            }
-
-            // ============================================================
-            // 2. KEYBOARD SHORTCUTS DISABLE (INSTANT)
-            // ============================================================
+            // 🔒 Keyboard shortcuts - INSTANT BLOCK (0.1s)
             document.addEventListener('keydown', function(e) {
+                const key = e.key;
+                const ctrl = e.ctrlKey;
+                const shift = e.shiftKey;
+
                 // F12
-                if (e.key === 'F12' || e.keyCode === 123) {
+                if (key === 'F12' || e.keyCode === 123) {
                     e.preventDefault();
-                    blockAndRedirect();
+                    e.stopPropagation();
+                    window.location.replace('https://www.google.com');
                     return false;
                 }
-                
                 // Ctrl+Shift+I (Inspect)
-                if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.keyCode === 73)) {
+                if (ctrl && shift && (key === 'I' || key === 'i' || e.keyCode === 73)) {
                     e.preventDefault();
-                    blockAndRedirect();
+                    e.stopPropagation();
+                    window.location.replace('https://www.google.com');
                     return false;
                 }
-                
                 // Ctrl+Shift+J (Console)
-                if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.keyCode === 74)) {
+                if (ctrl && shift && (key === 'J' || key === 'j' || e.keyCode === 74)) {
                     e.preventDefault();
-                    blockAndRedirect();
+                    e.stopPropagation();
+                    window.location.replace('https://www.google.com');
                     return false;
                 }
-                
                 // Ctrl+U (View Source)
-                if (e.ctrlKey && (e.key === 'U' || e.keyCode === 85)) {
+                if (ctrl && (key === 'U' || key === 'u' || e.keyCode === 85)) {
                     e.preventDefault();
-                    blockAndRedirect();
+                    e.stopPropagation();
+                    window.location.replace('https://www.google.com');
                     return false;
                 }
-                
                 // Ctrl+Shift+C (Element picker)
-                if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.keyCode === 67)) {
+                if (ctrl && shift && (key === 'C' || key === 'c' || e.keyCode === 67)) {
                     e.preventDefault();
-                    blockAndRedirect();
+                    e.stopPropagation();
+                    window.location.replace('https://www.google.com');
                     return false;
                 }
             });
 
-            // ============================================================
-            // 3. 🟢 RIGHT CLICK: ALLOWED (User preshan nahi hoga)
-            // ============================================================
-            // 🔥 FIX: Right click ko ALLOW kiya gaya hai
-            // User right click kar sakta hai, koi redirect nahi hoga
-            // document.addEventListener('contextmenu', function(e) { ... }) HATAYA
+            // ✅ RIGHT CLICK: ALLOWED
 
             // ============================================================
-            // 4. 🚫 NO DEBUGGER STATEMENT - Use Size Detection
+            // 📱 MOBILE DETECTION - Desktop par hi chale
             // ============================================================
-            let detectionCount = 0;
-            
-            function detectDevTools() {
-                // Method 1: Window outer/inner size difference
-                const widthDiff = window.outerWidth - window.innerWidth;
-                const heightDiff = window.outerHeight - window.innerHeight;
-                
-                // Method 2: console.log timing
-                const start = performance.now();
-                console.log('%c', {});
-                const end = performance.now();
-                
-                // Method 3: Check Firebug
-                if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) {
-                    detectionCount++;
-                    if (detectionCount >= 2) {
-                        blockAndRedirect();
-                    }
-                    return;
-                }
-                
-                // Check if dev tools detected
-                if (widthDiff > 100 || heightDiff > 100 || (end - start > 10)) {
-                    detectionCount++;
-                    if (detectionCount >= 2) {
-                        blockAndRedirect();
-                    }
-                } else {
-                    detectionCount = 0;
-                }
+            function isMobile() {
+                return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|BlackBerry|IEMobile/i.test(navigator.userAgent);
             }
 
             // ============================================================
-            // 5. CONSOLE CLEAR + OVERRIDE
+            // 🚀 DESKTOP: INSTANT DEVTOOLS DETECTION (0.1s)
             // ============================================================
+            if (!isMobile()) {
+                let detectionCount = 0;
+
+                function detectDevTools() {
+                    // ⚡ Method 1: Window size difference
+                    const widthDiff = window.outerWidth - window.innerWidth;
+                    const heightDiff = window.outerHeight - window.innerHeight;
+
+                    // ⚡ Method 2: console.log timing
+                    const start = performance.now();
+                    console.log('%c', {});
+                    const end = performance.now();
+
+                    // ⚡ Method 3: Firebug check
+                    if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) {
+                        detectionCount++;
+                        if (detectionCount >= 1) {
+                            window.location.replace('https://www.google.com');
+                        }
+                        return;
+                    }
+
+                    // ⚡ INSTANT REDIRECT - 1 detection par hi redirect
+                    if (widthDiff > 100 || heightDiff > 100 || (end - start > 10)) {
+                        detectionCount++;
+                        if (detectionCount >= 1) {
+                            window.location.replace('https://www.google.com');
+                        }
+                    } else {
+                        detectionCount = 0;
+                    }
+                }
+
+                // ⚡ HAR 100ms (0.1 SECOND) ME CHECK KAREIN
+                setInterval(detectDevTools, 100);
+            }
+
+            // ============================================================
+            // 🧹 NETWORK TAB CLEAR - HAR 100ms (0.1s)
+            // ============================================================
+            setInterval(function() {
+                try {
+                    if (window.performance && performance.clearResourceTimings) {
+                        performance.clearResourceTimings();
+                    }
+                } catch(e) { /* ignore */ }
+            }, 100);
+
+            // 🧹 CONSOLE CLEAR - HAR 50ms
             setInterval(function() {
                 console.clear();
             }, 50);
 
-            // Override console methods (silent mode)
+            // Console methods ko silent karein
             const noop = function() {};
             console.log = noop;
             console.warn = noop;
@@ -854,36 +848,17 @@
             console.table = noop;
             console.dir = noop;
 
-            // ============================================================
-            // 6. NETWORK TAB CLEAR (History Delete) - Every 2 seconds
-            // ============================================================
-            setInterval(function() {
-                try {
-                    if (window.performance && performance.clearResourceTimings) {
-                        performance.clearResourceTimings();
-                    }
-                } catch(e) {
-                    // Ignore
-                }
-            }, 2000);
-
-            // ============================================================
-            // 7. CHECK EVERY 1 SECOND
-            // ============================================================
-            setInterval(detectDevTools, 1000);
-
-            console.log('✅ Website secured with Anti-Dev Tools protection!');
-            console.log('🟢 RIGHT CLICK: ALLOWED (user friendly)');
-            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED');
-            console.log('🚫 Developer tools will redirect to Google.com instantly!');
-            console.log('📡 Network tab will be cleared automatically!');
+            console.log('✅ Anti-DevTools: INSTANT MODE (0.1s) ACTIVE');
+            console.log('🟢 RIGHT CLICK: ALLOWED');
+            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
+            console.log('📱 Mobile users: SAFE, no redirects');
         })();
 
         /**
          * ================================================================
          *  🔐 LIVE STREAM - One-Time Key + Remote Config + Auto Refresh
          *  - Keys loaded from Cloudflare D1 database
-         *  - ONE-TIME USE: Keys cannot be reused
+         *  - ONE-TIME USE: Keys cannot be reused (Database-driven)
          *  - Admin can generate and sync new keys
          *  - Auto-refresh when admin changes config
          *  - 2 Hour Timer
@@ -938,7 +913,7 @@
         async function loadKeysFromDB() {
             try {
                 const response = await fetch(`${WORKER_URL}/get-keys`);
-                if (!response.ok) return;
+                if (!response.ok) return false;
                 const data = await response.json();
 
                 if (data.keys && data.keys.length === 10) {
@@ -953,6 +928,44 @@
             } catch (error) {
                 console.error('❌ Failed to load keys from DB:', error);
                 return false;
+            }
+        }
+
+        // ============================================================
+        // 🔍 CHECK USED KEYS FROM DATABASE (GET)
+        // ============================================================
+        async function fetchUsedKeysFromDB() {
+            try {
+                const response = await fetch(`${WORKER_URL}/sync-used-keys`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (!response.ok) throw new Error('Failed to fetch used keys');
+                const data = await response.json();
+                return data.usedKeys || [];
+            } catch (error) {
+                console.error('❌ Failed to fetch used keys from DB:', error);
+                return [];
+            }
+        }
+
+        // ============================================================
+        // 💾 SYNC USED KEYS TO DATABASE (POST)
+        // ============================================================
+        async function syncUsedKeysToDB(usedKeys) {
+            try {
+                const response = await fetch(`${WORKER_URL}/sync-used-keys`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usedKeys: usedKeys })
+                });
+                if (!response.ok) throw new Error('Failed to sync used keys');
+                const data = await response.json();
+                console.log('✅ Used keys synced to database:', data);
+                return data;
+            } catch (error) {
+                console.error('❌ Failed to sync used keys:', error);
+                return null;
             }
         }
 
@@ -1011,10 +1024,9 @@
         }
 
         // ============================================================
-        // 🔐 VERIFICATION - ONE-TIME USE
+        // 🔐 VERIFICATION - ONE-TIME USE (Database se used keys check)
         // ============================================================
-
-        function verifyKey() {
+        async function verifyKey() {
             const enteredKey = keyInput.value.trim();
 
             if (!enteredKey) {
@@ -1029,10 +1041,12 @@
                 return;
             }
 
-            // Check if key has already been used
-            const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
-            if (usedKeys.includes(enteredKey)) {
-                verifyMessage.textContent = '❌ This key has already been used!';
+            // 🔍 DATABASE SE USED KEYS FETCH KAREIN
+            const usedKeysFromDB = await fetchUsedKeysFromDB();
+
+            // Check if key has already been used (Database se)
+            if (usedKeysFromDB.includes(enteredKey)) {
+                verifyMessage.textContent = '❌ This key has already been used! Please contact admin for a new key.';
                 verifyMessage.className = 'verify-error';
                 keyInput.value = '';
                 keyInput.focus();
@@ -1041,12 +1055,13 @@
 
             // Check if key is valid
             if (VALID_KEYS.includes(enteredKey)) {
-                // Mark key as used
-                usedKeys.push(enteredKey);
-                localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
-
-                // Sync used keys to DB
-                syncUsedKeysToDB(usedKeys);
+                // ✅ KEY VALID HAI, AB USE KAREIN
+                // Mark key as used in Database
+                usedKeysFromDB.push(enteredKey);
+                await syncUsedKeysToDB(usedKeysFromDB);
+                
+                // Local Storage bhi update karein (for quick check)
+                localStorage.setItem('usedKeys', JSON.stringify(usedKeysFromDB));
 
                 sessionKey = enteredKey;
                 localStorage.setItem('sessionKey', sessionKey);
@@ -1070,23 +1085,6 @@
                 verifyMessage.className = 'verify-error';
                 keyInput.value = '';
                 keyInput.focus();
-            }
-        }
-
-        // ============================================================
-        // 💾 SYNC USED KEYS TO DATABASE
-        // ============================================================
-
-        async function syncUsedKeysToDB(usedKeys) {
-            try {
-                await fetch(`${WORKER_URL}/sync-used-keys`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ usedKeys: usedKeys })
-                });
-                console.log('✅ Used keys synced to database');
-            } catch (error) {
-                console.error('❌ Failed to sync used keys:', error);
             }
         }
 
@@ -1408,12 +1406,12 @@
             console.log('⏱️ Timer: 2 Hours');
             console.log('📡 Remote Control: Active');
             console.log('🔄 Auto-refresh: Active');
-            console.log('🔒 One-time use key system is ACTIVE');
+            console.log('🔒 One-time use key system is ACTIVE (Database-driven)');
             console.log('📱 Contact Admin buttons added on both pages');
-            console.log('🛡️ Anti-Developer Tools: ACTIVE');
+            console.log('🛡️ Anti-Developer Tools: INSTANT MODE (0.1s) ACTIVE');
             console.log('🟢 RIGHT CLICK: ALLOWED');
-            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: BLOCKED');
-            console.log('🚫 Developer tools will redirect to Google.com instantly!');
+            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
+            console.log('📱 Mobile users: SAFE, no redirects');
         });
 
         // ============================================================
