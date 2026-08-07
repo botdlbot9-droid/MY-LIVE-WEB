@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Full Control</title>
     <style>
-        /* ================================================================
-           CSS - Admin Panel Premium Dark Theme
-           ================================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -41,7 +38,6 @@
             display: none !important;
         }
 
-        /* ===== LOGIN PAGE ===== */
         #loginPage {
             text-align: center;
         }
@@ -58,7 +54,6 @@
             background: linear-gradient(135deg, #f7971e, #ffd200);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .login-subtitle {
@@ -76,7 +71,6 @@
             color: #fff;
             font-size: 16px;
             outline: none;
-            transition: 0.3s;
         }
 
         .login-input:focus {
@@ -95,7 +89,6 @@
             font-size: 18px;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.3s;
         }
 
         .login-btn:hover {
@@ -110,7 +103,6 @@
             min-height: 20px;
         }
 
-        /* ===== ADMIN PANEL ===== */
         #adminPanel {
             text-align: center;
         }
@@ -127,7 +119,6 @@
             background: linear-gradient(135deg, #f7971e, #ffd200);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .admin-subtitle {
@@ -136,14 +127,12 @@
             margin-bottom: 20px;
         }
 
-        /* ===== STREAM CONFIG ===== */
         .config-section {
             background: rgba(18, 18, 30, 0.6);
             border-radius: 12px;
             padding: 18px;
             border: 1px solid #2a2a4e;
             margin-bottom: 16px;
-            backdrop-filter: blur(10px);
             text-align: left;
         }
 
@@ -164,28 +153,10 @@
             color: #fff;
             font-size: 14px;
             outline: none;
-            transition: 0.3s;
-            font-family: 'Segoe UI', sans-serif;
         }
 
         .config-section input:focus {
             border-color: #f7971e;
-            box-shadow: 0 0 20px rgba(247, 151, 30, 0.1);
-        }
-
-        .config-section input::placeholder {
-            color: #6a6a8a;
-        }
-
-        .config-row {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .config-row .config-section {
-            flex: 1;
-            min-width: 200px;
         }
 
         .btn-apply {
@@ -199,7 +170,6 @@
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
-            transition: 0.3s;
         }
 
         .btn-apply:hover {
@@ -218,7 +188,6 @@
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
-            transition: 0.3s;
         }
 
         .btn-refresh-users:hover {
@@ -226,7 +195,6 @@
             box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
         }
 
-        /* ===== STATUS BOX ===== */
         .status-box {
             background: rgba(18, 18, 30, 0.6);
             border-radius: 10px;
@@ -254,14 +222,12 @@
             color: #ff6b6b;
         }
 
-        /* ===== KEYS LIST ===== */
         .keys-container {
             background: rgba(18, 18, 30, 0.6);
             border-radius: 12px;
             padding: 16px;
             border: 1px solid #2a2a4e;
             margin-bottom: 16px;
-            backdrop-filter: blur(10px);
         }
 
         .keys-title {
@@ -291,7 +257,6 @@
             letter-spacing: 2px;
             color: #f7971e;
             cursor: pointer;
-            transition: all 0.3s ease;
             user-select: none;
         }
 
@@ -299,7 +264,6 @@
             background: #1a1a3e;
             border-color: #f7971e;
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
         }
 
         .key-item.copied {
@@ -328,7 +292,6 @@
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
-            transition: 0.3s;
         }
 
         .btn-generate:hover {
@@ -336,7 +299,6 @@
             box-shadow: 0 8px 30px rgba(247, 151, 30, 0.35);
         }
 
-        /* ===== CONTROLS ===== */
         .btn-group {
             display: flex;
             gap: 10px;
@@ -351,8 +313,6 @@
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
-            transition: 0.3s;
-            font-family: 'Segoe UI', sans-serif;
             flex: 1;
             min-width: 100px;
         }
@@ -397,11 +357,6 @@
             box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
         }
 
-        .btn-blank:hover {
-            transform: scale(1.03);
-            box-shadow: 0 8px 30px rgba(108, 92, 231, 0.5);
-        }
-
         .btn-blank:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -412,11 +367,6 @@
             background: linear-gradient(135deg, #00b894, #00cec9);
             color: #fff;
             box-shadow: 0 4px 20px rgba(0, 184, 148, 0.3);
-        }
-
-        .btn-remove-blank:hover {
-            transform: scale(1.03);
-            box-shadow: 0 8px 30px rgba(0, 184, 148, 0.5);
         }
 
         .btn-remove-blank:disabled {
@@ -439,7 +389,6 @@
             color: #fff;
         }
 
-        /* ===== MESSAGE ===== */
         .message {
             margin-top: 12px;
             padding: 10px 16px;
@@ -470,7 +419,6 @@
             border-left: 3px solid #f7971e;
         }
 
-        /* ===== FOOTER ===== */
         .footer {
             margin-top: 20px;
             text-align: center;
@@ -530,12 +478,6 @@
             .btn-refresh {
                 flex: 1;
             }
-            .config-row {
-                flex-direction: column;
-            }
-            .config-row .config-section {
-                min-width: 100%;
-            }
         }
     </style>
 </head>
@@ -543,7 +485,6 @@
 
     <div class="container">
 
-        <!-- ===== LOGIN PAGE ===== -->
         <div id="loginPage">
             <div class="lock-icon">🔐</div>
             <div class="login-title">Admin Login</div>
@@ -553,7 +494,6 @@
             <div id="loginError" class="login-error"></div>
         </div>
 
-        <!-- ===== ADMIN PANEL ===== -->
         <div id="adminPanel" class="hidden">
             <div class="admin-icon">🎬</div>
             <div class="admin-title">Video Control</div>
@@ -564,7 +504,6 @@
                 <span id="connText">Connected to API</span>
             </div>
 
-            <!-- ===== STREAM CONFIG ===== -->
             <div class="config-section">
                 <span class="label">📺 Class Name</span>
                 <input type="text" id="classNameInput" placeholder="Enter class name..." value="ClassPlus Live">
@@ -578,7 +517,6 @@
                 </div>
             </div>
 
-            <!-- ===== REFRESH USERS BUTTON ===== -->
             <div class="config-section">
                 <button class="btn-refresh-users" onclick="refreshAllUsers()">🔄 Refresh All Users</button>
                 <div style="font-size:11px; color:#6a6a8a; margin-top:5px; text-align:center;">
@@ -586,7 +524,6 @@
                 </div>
             </div>
 
-            <!-- ===== STATUS ===== -->
             <div class="status-box">
                 <div class="label">📊 Current Status</div>
                 <div class="value" id="statusValue">
@@ -594,7 +531,6 @@
                 </div>
             </div>
 
-            <!-- ===== KEYS LIST ===== -->
             <div class="keys-container">
                 <div class="keys-title">🔑 Available Keys <span style="color:#6a6a8a;font-weight:400;">(Click to copy)</span></div>
                 <div class="keys-grid" id="adminKeyGrid"></div>
@@ -607,7 +543,6 @@
                 </div>
             </div>
 
-            <!-- ===== CONTROLS (INSTANT - 0.1s) ===== -->
             <div class="btn-group">
                 <button class="btn btn-pause" id="pauseBtn" onclick="pauseVideo()">⏸️ Pause</button>
                 <button class="btn btn-resume" id="resumeBtn" onclick="resumeVideo()">▶️ Play</button>
@@ -627,169 +562,76 @@
     </div>
 
     <script>
-        /**
-         * ================================================================
-         *  🛡️ ANTI-DEVELOPER TOOLS - INSTANT REDIRECT (0.1s) - Mobile Friendly
-         *  - Mobile users: SAFE, no redirects
-         *  - Desktop: F12, Ctrl+Shift+I, Ctrl+Shift+J → INSTANT REDIRECT (0.1s)
-         *  - Network tab cleared every 100ms
-         *  - RIGHT CLICK: ALLOWED
-         * ================================================================
-         */
         (function antiDevTools() {
-            // 🔒 Keyboard shortcuts - INSTANT BLOCK (0.1s)
             document.addEventListener('keydown', function(e) {
-                const key = e.key;
-                const ctrl = e.ctrlKey;
-                const shift = e.shiftKey;
-
-                // F12
-                if (key === 'F12' || e.keyCode === 123) {
+                if (e.key === 'F12' || e.keyCode === 123) {
                     e.preventDefault();
-                    e.stopPropagation();
                     window.location.replace('https://www.google.com');
                     return false;
                 }
-                // Ctrl+Shift+I (Inspect)
-                if (ctrl && shift && (key === 'I' || key === 'i' || e.keyCode === 73)) {
+                if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
                     e.preventDefault();
-                    e.stopPropagation();
                     window.location.replace('https://www.google.com');
                     return false;
                 }
-                // Ctrl+Shift+J (Console)
-                if (ctrl && shift && (key === 'J' || key === 'j' || e.keyCode === 74)) {
+                if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
                     e.preventDefault();
-                    e.stopPropagation();
                     window.location.replace('https://www.google.com');
                     return false;
                 }
-                // Ctrl+U (View Source)
-                if (ctrl && (key === 'U' || key === 'u' || e.keyCode === 85)) {
+                if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
                     e.preventDefault();
-                    e.stopPropagation();
-                    window.location.replace('https://www.google.com');
-                    return false;
-                }
-                // Ctrl+Shift+C (Element picker)
-                if (ctrl && shift && (key === 'C' || key === 'c' || e.keyCode === 67)) {
-                    e.preventDefault();
-                    e.stopPropagation();
                     window.location.replace('https://www.google.com');
                     return false;
                 }
             });
 
-            // ✅ RIGHT CLICK: ALLOWED
-
-            // ============================================================
-            // 📱 MOBILE DETECTION - Desktop par hi chale
-            // ============================================================
             function isMobile() {
                 return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|BlackBerry|IEMobile/i.test(navigator.userAgent);
             }
 
-            // ============================================================
-            // 🚀 DESKTOP: INSTANT DEVTOOLS DETECTION (0.1s)
-            // ============================================================
             if (!isMobile()) {
                 let detectionCount = 0;
-
-                function detectDevTools() {
-                    // ⚡ Method 1: Window size difference
+                setInterval(function() {
                     const widthDiff = window.outerWidth - window.innerWidth;
                     const heightDiff = window.outerHeight - window.innerHeight;
-
-                    // ⚡ Method 2: console.log timing
-                    const start = performance.now();
-                    console.log('%c', {});
-                    const end = performance.now();
-
-                    // ⚡ Method 3: Firebug check
-                    if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) {
+                    if (widthDiff > 100 || heightDiff > 100) {
                         detectionCount++;
-                        if (detectionCount >= 1) {
-                            window.location.replace('https://www.google.com');
-                        }
-                        return;
-                    }
-
-                    // ⚡ INSTANT REDIRECT - 1 detection par hi redirect
-                    if (widthDiff > 100 || heightDiff > 100 || (end - start > 10)) {
-                        detectionCount++;
-                        if (detectionCount >= 1) {
+                        if (detectionCount >= 2) {
                             window.location.replace('https://www.google.com');
                         }
                     } else {
                         detectionCount = 0;
                     }
-                }
-
-                // ⚡ HAR 100ms (0.1 SECOND) ME CHECK KAREIN
-                setInterval(detectDevTools, 100);
+                }, 100);
             }
 
-            // ============================================================
-            // 🧹 NETWORK TAB CLEAR - HAR 100ms (0.1s)
-            // ============================================================
             setInterval(function() {
+                console.clear();
                 try {
                     if (window.performance && performance.clearResourceTimings) {
                         performance.clearResourceTimings();
                     }
-                } catch(e) { /* ignore */ }
+                } catch (e) {}
             }, 100);
 
-            // 🧹 CONSOLE CLEAR - HAR 50ms
-            setInterval(function() {
-                console.clear();
-            }, 50);
-
-            // Console methods ko silent karein
-            const noop = function() {};
-            console.log = noop;
-            console.warn = noop;
-            console.error = noop;
-            console.info = noop;
-            console.debug = noop;
-            console.table = noop;
-            console.dir = noop;
-
-            console.log('✅ Anti-DevTools: INSTANT MODE (0.1s) ACTIVE');
-            console.log('🟢 RIGHT CLICK: ALLOWED');
-            console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
-            console.log('📱 Mobile users: SAFE, no redirects');
+            console.log = function() {};
+            console.warn = function() {};
+            console.error = function() {};
+            console.info = function() {};
+            console.debug = function() {};
+            console.table = function() {};
+            console.dir = function() {};
         })();
-
-        /**
-         * ================================================================
-         *  🎬 ADMIN PANEL - Full Control with DB Sync
-         *  - Password protected login
-         *  - Set Class Name & Stream URL (saved to Cloudflare D1)
-         *  - Refresh Users button (forces all users to reload)
-         *  - 10 keys with regenerate button
-         *  - Sync Keys to Database (so new users can use them)
-         *  - One-time use key system (FIXED)
-         *  - INSTANT BUTTON RESPONSE (0.1s)
-         * ================================================================
-         */
-
-        // ============================================================
-        // 🔑 CONFIGURATION
-        // ============================================================
 
         const ADMIN_PASSWORD = "@rohit83077";
         const WORKER_URL = "https://hls-d1-api.bbro75574-4c4.workers.dev";
 
-        // ⭐⭐⭐ 10 KEYS (Default) ⭐⭐⭐
         let VALID_KEYS = [
             'K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
             'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4'
         ];
 
-        // ============================================================
-        // 📦 DOM REFS
-        // ============================================================
         const loginPage = document.getElementById('loginPage');
         const adminPanel = document.getElementById('adminPanel');
         const passwordInput = document.getElementById('passwordInput');
@@ -809,10 +651,6 @@
 
         const classNameInput = document.getElementById('classNameInput');
         const streamUrlInput = document.getElementById('streamUrlInput');
-
-        // ============================================================
-        // 🔑 KEY GENERATION
-        // ============================================================
 
         function generateRandomKey() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -835,34 +673,23 @@
             showAdminMessage('✅ 10 new keys generated! Syncing to database...', 'success');
             keySyncStatus.textContent = '⏳ Syncing to database...';
             keySyncStatus.style.color = '#f7971e';
-            
-            // 🆕 AUTO-SYNC: Database में तुरंत सेव करें
             syncKeysToDB();
         }
 
-        // ============================================================
-        // 💾 SYNC KEYS TO DATABASE
-        // ============================================================
-
         async function syncKeysToDB() {
             showAdminMessage('⏳ Syncing keys to database...', 'info');
-
             try {
                 const response = await fetch(`${WORKER_URL}/sync-keys`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ keys: VALID_KEYS })
                 });
-
                 if (!response.ok) throw new Error('Failed to sync keys');
-
                 const data = await response.json();
-
                 if (data.success) {
                     showAdminMessage('✅ Keys synced to database successfully!', 'success');
                     keySyncStatus.textContent = '✅ Keys are synced with database';
                     keySyncStatus.style.color = '#00ff88';
-                    // Update used keys in DB as well
                     const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
                     await fetch(`${WORKER_URL}/sync-used-keys`, {
                         method: 'POST',
@@ -878,13 +705,8 @@
             }
         }
 
-        // ============================================================
-        // 🔐 LOGIN
-        // ============================================================
-
         function login() {
             const password = passwordInput.value.trim();
-
             if (password === ADMIN_PASSWORD) {
                 loginPage.classList.add('hidden');
                 adminPanel.classList.remove('hidden');
@@ -893,7 +715,6 @@
                 renderAdminKeys();
                 fetchStatus();
                 setInterval(fetchStatus, 3000);
-                // Check key sync status
                 checkKeySyncStatus();
             } else {
                 loginError.textContent = '❌ Invalid password!';
@@ -906,10 +727,6 @@
             if (e.key === 'Enter') login();
         });
 
-        // ============================================================
-        // 💾 LOAD KEYS FROM STORAGE
-        // ============================================================
-
         function loadKeysFromStorage() {
             const savedKeys = localStorage.getItem('validKeys');
             if (savedKeys) {
@@ -918,18 +735,13 @@
                     if (Array.isArray(parsed) && parsed.length === 10) {
                         VALID_KEYS = parsed;
                     }
-                } catch (e) { /* ignore */ }
+                } catch (e) {}
             }
         }
-
-        // ============================================================
-        // 🔑 RENDER ADMIN KEYS
-        // ============================================================
 
         function renderAdminKeys() {
             const usedKeys = JSON.parse(localStorage.getItem('usedKeys') || '[]');
             adminKeyGrid.innerHTML = '';
-
             VALID_KEYS.forEach(key => {
                 const el = document.createElement('div');
                 el.className = 'key-item';
@@ -938,7 +750,6 @@
                 }
                 el.textContent = key;
                 el.title = usedKeys.includes(key) ? '❌ Already used!' : 'Click to copy';
-
                 el.addEventListener('click', function() {
                     if (usedKeys.includes(key)) {
                         showAdminMessage('❌ This key has already been used!', 'error');
@@ -960,21 +771,15 @@
                         showAdminMessage(`✅ Key copied: ${key}`, 'success');
                     });
                 });
-
                 adminKeyGrid.appendChild(el);
             });
         }
-
-        // ============================================================
-        // 🔄 CHECK KEY SYNC STATUS
-        // ============================================================
 
         async function checkKeySyncStatus() {
             try {
                 const response = await fetch(`${WORKER_URL}/get-keys`);
                 if (!response.ok) return;
                 const data = await response.json();
-
                 if (data.keys && JSON.stringify(data.keys) === JSON.stringify(VALID_KEYS)) {
                     keySyncStatus.textContent = '✅ Keys are synced with database';
                     keySyncStatus.style.color = '#00ff88';
@@ -987,35 +792,22 @@
             }
         }
 
-        // ============================================================
-        // 🎬 APPLY STREAM CONFIG
-        // ============================================================
-
         async function applyStreamConfig() {
             const className = classNameInput.value.trim() || "ClassPlus Live";
             const streamUrl = streamUrlInput.value.trim();
-
             if (!streamUrl) {
                 showAdminMessage('❌ Please enter a valid stream URL!', 'error');
                 return;
             }
-
             showAdminMessage('⏳ Saving config to database...', 'info');
-
             try {
                 const response = await fetch(`${WORKER_URL}/update-config`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        className: className,
-                        streamUrl: streamUrl
-                    })
+                    body: JSON.stringify({ className: className, streamUrl: streamUrl })
                 });
-
                 if (!response.ok) throw new Error('Failed to save config');
-
                 const data = await response.json();
-
                 if (data.success) {
                     showAdminMessage(`✅ Config saved to database! Class: ${className}`, 'success');
                     localStorage.setItem('adminClassName', className);
@@ -1031,24 +823,16 @@
             }
         }
 
-        // ============================================================
-        // 🔄 REFRESH ALL USERS
-        // ============================================================
-
         async function refreshAllUsers() {
             showAdminMessage('⏳ Sending refresh signal to all users...', 'info');
-
             try {
                 const response = await fetch(`${WORKER_URL}/set-refresh`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ refresh: true })
                 });
-
                 if (!response.ok) throw new Error('Failed to send refresh signal');
-
                 const data = await response.json();
-
                 if (data.success) {
                     showAdminMessage('✅ Refresh signal sent! All users will reload.', 'success');
                     setTimeout(async () => {
@@ -1066,10 +850,6 @@
                 showAdminMessage(`❌ Failed to send refresh signal: ${error.message}`, 'error');
             }
         }
-
-        // ============================================================
-        // 📊 FETCH STATUS
-        // ============================================================
 
         async function fetchStatus() {
             try {
@@ -1113,7 +893,6 @@
                 lastUpdated.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
                 hideAdminMessage();
                 renderAdminKeys();
-
             } catch (error) {
                 console.error('❌ Fetch error:', error);
                 connDot.className = 'dot offline';
@@ -1129,17 +908,12 @@
         }
 
         // ============================================================
-        // ✏️ UPDATE STATUS - INSTANT (0.1s)
+        // ✏️ UPDATE STATUS - INSTANT (0.1s) - SIRF YAHAN CHANGE
         // ============================================================
-
         async function updateStatus(newStatus, actionName) {
             const btn = document.querySelector(`.btn-${actionName === 'pause' ? 'pause' : actionName === 'resume' ? 'resume' : actionName === 'blank' ? 'blank' : 'remove-blank'}`);
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = '⏳...';
-            }
 
-            // ✅ INSTANT UI UPDATE - Pehle change dikhao
+            // ✅ INSTANT UI UPDATE - Pehle hi change dikhao (0.1s)
             if (newStatus === 'playing') {
                 statusText.textContent = '▶️ Playing';
                 statusText.className = 'value online';
@@ -1161,6 +935,11 @@
                 resumeBtn.disabled = true;
                 blankBtn.disabled = true;
                 removeBlankBtn.disabled = false;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '⏳...';
             }
 
             showAdminMessage(`⏳ ${actionName}ing...`, 'info');
@@ -1217,9 +996,6 @@
             updateStatus('playing', 'remove-blank');
         }
 
-        // ============================================================
-        // 📢 MESSAGE HELPER
-        // ============================================================
         function showAdminMessage(msg, type) {
             adminMessage.textContent = msg;
             adminMessage.className = 'message show ' + type;
@@ -1230,30 +1006,20 @@
             adminMessage.textContent = '';
         }
 
-        // ============================================================
-        // 🚀 LOAD SAVED CONFIG
-        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const savedClassName = localStorage.getItem('adminClassName');
             const savedStreamUrl = localStorage.getItem('adminStreamUrl');
-
             if (savedClassName) {
                 classNameInput.value = savedClassName;
             }
             if (savedStreamUrl) {
                 streamUrlInput.value = savedStreamUrl;
             }
-
             loadKeysFromStorage();
         });
 
         console.log('✅ Admin Panel loaded!');
         console.log('🔑 Password:', ADMIN_PASSWORD);
-        console.log('📡 API:', WORKER_URL);
-        console.log('🛡️ Anti-Developer Tools: INSTANT MODE (0.1s) ACTIVE');
-        console.log('🟢 RIGHT CLICK: ALLOWED');
-        console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
-        console.log('📱 Mobile users: SAFE, no redirects');
         console.log('⚡ Button Response: INSTANT (0.1s)');
     </script>
 
