@@ -44,45 +44,6 @@
             display: none !important;
         }
 
-        /* ===== ANTI-DEV TOOLS BLOCK PAGE ===== */
-        #devToolsBlock {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a12;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 99999;
-            padding: 20px;
-            text-align: center;
-        }
-
-        #devToolsBlock.show {
-            display: flex;
-        }
-
-        #devToolsBlock .block-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-
-        #devToolsBlock .block-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: #ff6b6b;
-            margin-bottom: 10px;
-        }
-
-        #devToolsBlock .block-subtitle {
-            color: #a0a0b8;
-            font-size: 18px;
-            max-width: 500px;
-        }
-
         /* ===== VERIFICATION PAGE ===== */
         #verificationPage {
             max-width: 500px;
@@ -636,15 +597,6 @@
 </head>
 <body>
 
-    <!-- ========================================================== -->
-    <!-- 🛡️ ANTI-DEVELOPER TOOLS BLOCK PAGE -->
-    <!-- ========================================================== -->
-    <div id="devToolsBlock">
-        <div class="block-icon">🚫</div>
-        <div class="block-title">Access Denied</div>
-        <div class="block-subtitle">Developer tools are not allowed on this page. Please close them to continue.</div>
-    </div>
-
     <!-- ===== BLANK OVERLAY ===== -->
     <div id="blankOverlay">
         <div class="blank-icon">📺</div>
@@ -770,63 +722,72 @@
     <script>
         /**
          * ================================================================
-         *  🛡️ ANTI-DEVELOPER TOOLS - Complete Protection
-         *  - F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U disabled
-         *  - Right click disabled
-         *  - Debugger trap detection
-         *  - Console cleared
-         *  - Blank page on detection
+         *  🛡️ ANTI-DEVELOPER TOOLS - INSTANT BLOCK + GOOGLE REDIRECT
+         *  - Developer tools open karne par INSTANT block
+         *  - Google.com par redirect
+         *  - Network tab clear (history delete)
+         *  - Console clear
+         *  - All shortcuts disabled
          * ================================================================
          */
         (function antiDevTools() {
             // ============================================================
-            // 1. BLOCK PAGE SHOW
+            // 1. INSTANT BLOCK + GOOGLE REDIRECT FUNCTION
             // ============================================================
-            function showBlockPage() {
-                const block = document.getElementById('devToolsBlock');
-                if (block) {
-                    block.classList.add('show');
+            function blockAndRedirect() {
+                // Console clear karein
+                console.clear();
+                
+                // Network history clear karne ki koshish
+                try {
+                    // Performance entries clear karein
+                    performance.clearResourceTimings();
+                    performance.clearMarks();
+                    performance.clearMeasures();
+                } catch(e) {
+                    // Ignore
                 }
-                // Optional: Redirect to blank page
-                // window.location.href = 'about:blank';
+                
+                // 🚀 GOOGLE.COM PAR REDIRECT
+                window.location.href = 'https://www.google.com';
             }
 
             // ============================================================
-            // 2. KEYBOARD SHORTCUTS DISABLE
+            // 2. KEYBOARD SHORTCUTS DISABLE (INSTANT)
             // ============================================================
             document.addEventListener('keydown', function(e) {
                 // F12
                 if (e.key === 'F12' || e.keyCode === 123) {
                     e.preventDefault();
-                    showBlockPage();
+                    blockAndRedirect();
                     return false;
                 }
                 
                 // Ctrl+Shift+I (Inspect)
                 if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.keyCode === 73)) {
                     e.preventDefault();
-                    showBlockPage();
+                    blockAndRedirect();
                     return false;
                 }
                 
                 // Ctrl+Shift+J (Console)
                 if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.keyCode === 74)) {
                     e.preventDefault();
-                    showBlockPage();
+                    blockAndRedirect();
                     return false;
                 }
                 
                 // Ctrl+U (View Source)
                 if (e.ctrlKey && (e.key === 'U' || e.keyCode === 85)) {
                     e.preventDefault();
-                    showBlockPage();
+                    blockAndRedirect();
                     return false;
                 }
                 
                 // Ctrl+Shift+C (Element picker)
                 if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.keyCode === 67)) {
                     e.preventDefault();
-                    showBlockPage();
+                    blockAndRedirect();
                     return false;
                 }
             });
@@ -836,20 +797,20 @@
             // ============================================================
             document.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
-                showBlockPage();
+                blockAndRedirect();
                 return false;
             });
 
             // ============================================================
-            // 4. DEBUGGER DETECTION (Trap)
+            // 4. DEBUGGER DETECTION (INSTANT TRAP)
             // ============================================================
             function detectDevTools() {
-                const start = new Date();
+                const start = performance.now();
                 debugger; // ❗ Breakpoint - Dev Tools open karne par break hota hai
-                const end = new Date();
-                // Agar 100ms se zyada time laga to Dev Tools open hai
-                if (end - start > 100) {
-                    showBlockPage();
+                const end = performance.now();
+                // Agar 50ms se zyada time laga to Dev Tools open hai
+                if (end - start > 50) {
+                    blockAndRedirect();
                 }
             }
 
@@ -861,7 +822,7 @@
                     const element = new Image();
                     Object.defineProperty(element, 'id', {
                         get: function() {
-                            showBlockPage();
+                            blockAndRedirect();
                         }
                     });
                     console.log('%c', element);
@@ -871,11 +832,11 @@
             })();
 
             // ============================================================
-            // 6. CONSOLE CLEAR
+            // 6. CONSOLE CLEAR + OVERRIDE
             // ============================================================
             setInterval(function() {
                 console.clear();
-            }, 100);
+            }, 50);
 
             // Override console methods
             console.log = function() {};
@@ -883,13 +844,37 @@
             console.error = function() {};
             console.info = function() {};
             console.debug = function() {};
+            console.table = function() {};
+            console.dir = function() {};
 
             // ============================================================
-            // 7. CHECK EVERY 2 SECONDS
+            // 7. NETWORK TAB CLEAR (History Delete)
             // ============================================================
-            setInterval(detectDevTools, 2000);
+            try {
+                // Performance entries clear
+                if (window.performance && performance.clearResourceTimings) {
+                    performance.clearResourceTimings();
+                }
+                // Clear navigation entries
+                if (window.performance && performance.clearMarks) {
+                    performance.clearMarks();
+                    performance.clearMeasures();
+                }
+                // Clear navigation timings
+                if (window.performance && performance.navigation) {
+                    // Can't delete navigation object, but we can clear timing entries
+                }
+            } catch(e) {
+                // Ignore
+            }
+
+            // ============================================================
+            // 8. CHECK EVERY 1 SECOND (FASTER DETECTION)
+            // ============================================================
+            setInterval(detectDevTools, 1000);
 
             console.log('✅ Website secured with Anti-Dev Tools protection!');
+            console.log('🚫 Developer tools will redirect to Google.com instantly!');
         })();
 
         /**
@@ -1423,7 +1408,8 @@
             console.log('🔄 Auto-refresh: Active');
             console.log('🔒 One-time use key system is ACTIVE');
             console.log('📱 Contact Admin buttons added on both pages');
-            console.log('🛡️ Anti-Developer Tools protection is ACTIVE');
+            console.log('🛡️ Anti-Developer Tools: ACTIVE');
+            console.log('🚫 Developer tools will redirect to Google.com instantly!');
         });
 
         // ============================================================
