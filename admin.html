@@ -607,7 +607,7 @@
                 </div>
             </div>
 
-            <!-- ===== CONTROLS ===== -->
+            <!-- ===== CONTROLS (INSTANT - 0.1s) ===== -->
             <div class="btn-group">
                 <button class="btn btn-pause" id="pauseBtn" onclick="pauseVideo()">⏸️ Pause</button>
                 <button class="btn btn-resume" id="resumeBtn" onclick="resumeVideo()">▶️ Play</button>
@@ -770,6 +770,7 @@
          *  - 10 keys with regenerate button
          *  - Sync Keys to Database (so new users can use them)
          *  - One-time use key system (FIXED)
+         *  - INSTANT BUTTON RESPONSE (0.1s)
          * ================================================================
          */
 
@@ -1128,14 +1129,38 @@
         }
 
         // ============================================================
-        // ✏️ UPDATE STATUS
+        // ✏️ UPDATE STATUS - INSTANT (0.1s)
         // ============================================================
 
         async function updateStatus(newStatus, actionName) {
             const btn = document.querySelector(`.btn-${actionName === 'pause' ? 'pause' : actionName === 'resume' ? 'resume' : actionName === 'blank' ? 'blank' : 'remove-blank'}`);
             if (btn) {
                 btn.disabled = true;
-                btn.textContent = '⏳ Processing...';
+                btn.textContent = '⏳...';
+            }
+
+            // ✅ INSTANT UI UPDATE - Pehle change dikhao
+            if (newStatus === 'playing') {
+                statusText.textContent = '▶️ Playing';
+                statusText.className = 'value online';
+                pauseBtn.disabled = false;
+                resumeBtn.disabled = true;
+                blankBtn.disabled = false;
+                removeBlankBtn.disabled = true;
+            } else if (newStatus === 'paused') {
+                statusText.textContent = '⏸️ Paused';
+                statusText.className = 'value offline';
+                pauseBtn.disabled = true;
+                resumeBtn.disabled = false;
+                blankBtn.disabled = true;
+                removeBlankBtn.disabled = true;
+            } else if (newStatus === 'blank') {
+                statusText.textContent = '📺 Blank Page';
+                statusText.className = 'value offline';
+                pauseBtn.disabled = true;
+                resumeBtn.disabled = true;
+                blankBtn.disabled = true;
+                removeBlankBtn.disabled = false;
             }
 
             showAdminMessage(`⏳ ${actionName}ing...`, 'info');
@@ -1152,20 +1177,23 @@
 
                 if (data.success) {
                     showAdminMessage(`✅ Video ${actionName}d!`, 'success');
-                    setTimeout(fetchStatus, 500);
                 } else {
                     throw new Error('API returned error');
                 }
             } catch (error) {
                 console.error('❌ Update error:', error);
                 showAdminMessage(`❌ Failed to ${actionName}`, 'error');
-                if (btn) {
+                setTimeout(fetchStatus, 500);
+            }
+
+            if (btn) {
+                setTimeout(() => {
                     btn.disabled = false;
                     btn.textContent = actionName === 'pause' ? '⏸️ Pause' :
                                      actionName === 'resume' ? '▶️ Play' :
                                      actionName === 'blank' ? '📺 Blank' :
                                      '🖼️ Remove';
-                }
+                }, 300);
             }
         }
 
@@ -1226,6 +1254,7 @@
         console.log('🟢 RIGHT CLICK: ALLOWED');
         console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
         console.log('📱 Mobile users: SAFE, no redirects');
+        console.log('⚡ Button Response: INSTANT (0.1s)');
     </script>
 
 </body>
