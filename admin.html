@@ -607,7 +607,7 @@
                 </div>
             </div>
 
-            <!-- ===== CONTROLS (INSTANT - 0.1s) ===== -->
+            <!-- ===== CONTROLS ===== -->
             <div class="btn-group">
                 <button class="btn btn-pause" id="pauseBtn" onclick="pauseVideo()">⏸️ Pause</button>
                 <button class="btn btn-resume" id="resumeBtn" onclick="resumeVideo()">▶️ Play</button>
@@ -767,7 +767,7 @@
          *  - Password protected login
          *  - Set Class Name & Stream URL (saved to Cloudflare D1)
          *  - Refresh Users button (forces all users to reload)
-         *  - 10 keys with regenerate button
+         *  - 50 keys with regenerate button
          *  - Sync Keys to Database (so new users can use them)
          *  - One-time use key system (FIXED)
          *  - INSTANT BUTTON RESPONSE (0.1s)
@@ -781,11 +781,11 @@
         const ADMIN_PASSWORD = "@rohit83077";
         const WORKER_URL = "https://hls-d1-api.bbro75574-4c4.workers.dev";
 
-        // ⭐⭐⭐ 10 KEYS (Default) ⭐⭐⭐
+        // ⭐⭐⭐ 50 KEYS (Default) ⭐⭐⭐
         let VALID_KEYS = [
             'K7H9R2M4', 'X8P5L3N6', 'Q2W9E7R1', 'T5Y4U8I2', 'F9G7H3J5',
             'B6V8C4X1', 'Z9M2N5P7', 'R4T8W3Q6', 'Y1U5I9O2', 'L3K8J6H4',
-            'A1B2C3D4E', 'F5G6H7I8', 'J9K0L1M2', 'N3O4P5Q6', 'R7S8T9U0',
+            'A1B2C3D4', 'F5G6H7I8', 'J9K0L1M2', 'N3O4P5Q6', 'R7S8T9U0',
             'V1W2X3Y4', 'Z5A6B7C8', 'D9E0F1G2', 'H3I4J5K6', 'L7M8N9O0',
             'P1Q2R3S4', 'T5U6V7W8', 'X9Y0Z1A2', 'B3C4D5E6', 'F7G8H9I0',
             'J1K2L3M4', 'N5O6P7Q8', 'R9S0T1U2', 'V3W4X5Y6', 'Z7A8B9C0',
@@ -840,7 +840,7 @@
             localStorage.setItem('validKeys', JSON.stringify(VALID_KEYS));
             localStorage.setItem('usedKeys', JSON.stringify([]));
             renderAdminKeys();
-            showAdminMessage('✅ 10 new keys generated! Syncing to database...', 'success');
+            showAdminMessage('✅ 50 new keys generated! Syncing to database...', 'success');
             keySyncStatus.textContent = '⏳ Syncing to database...';
             keySyncStatus.style.color = '#f7971e';
             
@@ -1263,6 +1263,7 @@
         console.log('🚫 F12, Ctrl+Shift+I, Ctrl+Shift+J: INSTANT REDIRECT');
         console.log('📱 Mobile users: SAFE, no redirects');
         console.log('⚡ Button Response: INSTANT (0.1s)');
+        console.log('🔑 Total Keys: 50');
     </script>
 
 </body>
