@@ -466,7 +466,44 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* ===== BLANK OVERLAY - White Page with "Not Found" ===== */
+        /* ================================================================
+           🔥 PAUSE OVERLAY - Dark (No Icon, Sirf Text)
+           ================================================================ */
+        #pauseOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a12;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #pauseOverlay.show {
+            display: flex;
+        }
+
+        #pauseOverlay .pause-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #6a6a8a;
+            margin-bottom: 10px;
+        }
+
+        #pauseOverlay .pause-subtitle {
+            color: #3a3a4e;
+            font-size: 16px;
+        }
+
+        /* ================================================================
+           🔥 BLANK OVERLAY - White Page with "Not Found"
+           ================================================================ */
         #blankOverlay {
             position: fixed;
             top: 0;
@@ -591,6 +628,7 @@
             .controls-bar { flex-direction: column; }
             .status-bar { flex-direction: column; align-items: flex-start; }
             .verify-title { font-size: 24px; }
+            #pauseOverlay .pause-title { font-size: 24px; }
             #blankOverlay .blank-title { font-size: 24px; }
             .contact-admin { flex-direction: column; align-items: center; }
             .contact-btn { width: 100%; justify-content: center; }
@@ -599,7 +637,17 @@
 </head>
 <body>
 
-    <!-- ===== BLANK OVERLAY ===== -->
+    <!-- ============================================================ -->
+    <!-- 🔥 PAUSE OVERLAY - Dark (No Icon) -->
+    <!-- ============================================================ -->
+    <div id="pauseOverlay">
+        <div class="pause-title">Stream is Paused</div>
+        <div class="pause-subtitle">The live stream has been paused by the admin</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 🔥 BLANK OVERLAY - White "Not Found" -->
+    <!-- ============================================================ -->
     <div id="blankOverlay">
         <div class="blank-icon">📄</div>
         <div class="blank-title">Not Found</div>
@@ -887,6 +935,7 @@
         // ============================================================
         const verificationPage = document.getElementById('verificationPage');
         const playerPage = document.getElementById('playerPage');
+        const pauseOverlay = document.getElementById('pauseOverlay');
         const blankOverlay = document.getElementById('blankOverlay');
         const keyInput = document.getElementById('keyInput');
         const verifyMessage = document.getElementById('verifyMessage');
@@ -1106,9 +1155,8 @@
         });
 
         // ============================================================
-        // 🔄 REMOTE CONTROL
+        // 🔄 REMOTE CONTROL - Pause vs Blank (UPDATED)
         // ============================================================
-
         async function checkRemoteStatus() {
             try {
                 const response = await fetch(`${WORKER_URL}/status`);
@@ -1116,12 +1164,23 @@
                 const data = await response.json();
                 const status = data.value || 'playing';
 
-                if (status === 'paused' || status === 'blank') {
-                    blankOverlay.classList.add('show');
+                // ✅ Pause Overlay (Dark)
+                // ✅ Blank Overlay (White "Not Found")
+
+                if (status === 'paused') {
+                    pauseOverlay.classList.add('show');
+                    blankOverlay.classList.remove('show');
                     if (player) player.pause();
                     statusDot.className = 'dot offline';
                     statusTextRemote.textContent = '🔴 Paused by Admin';
+                } else if (status === 'blank') {
+                    pauseOverlay.classList.remove('show');
+                    blankOverlay.classList.add('show');
+                    if (player) player.pause();
+                    statusDot.className = 'dot offline';
+                    statusTextRemote.textContent = '🔴 Blank Page by Admin';
                 } else {
+                    pauseOverlay.classList.remove('show');
                     blankOverlay.classList.remove('show');
                     if (player && player.paused() && !player.ended()) {
                         player.play().catch(() => {});
